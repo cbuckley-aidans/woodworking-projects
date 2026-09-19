@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nest box with a slanted roof</title>
+<style>
+  :root {
+    --navy: #1b1f45;
+    --pink: #ea008a;
+    --paper: #ffffff;
+    --ink: #1b1f45;
+    --muted: #6b7091;
+    --line: #d7d9e4;
+    --stage: #eceef4;
+    --wash: #f4f5f9;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  .rule { height: 3px; background: var(--navy); margin: 0 0 14px; }
+  h1 {
+    font-size: clamp(30px, 6vw, 46px); line-height: 1.02; font-weight: 700;
+    letter-spacing: -0.025em; margin: 0 0 32px; max-width: 16ch;
+  }
+  h2 {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0 0 10px; color: var(--navy);
+  }
+  section { margin-top: 48px; }
+  section > .rule { margin-bottom: 12px; }
+
+  /* Stage */
+  .stage {
+    position: relative; height: clamp(340px, 72vw, 520px); background: var(--stage);
+    border: 1px solid var(--line);
+  }
+  .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; outline: none; }
+  .stage canvas:active { cursor: grabbing; }
+  .seg {
+    position: absolute; left: 14px; bottom: 14px; display: inline-flex;
+    border: 1px solid var(--navy); background: var(--paper);
+  }
+  .seg button {
+    border: 0; background: transparent; color: var(--navy); font: inherit;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 9px 16px; cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--navy); }
+  .seg button[aria-pressed="true"] { background: var(--pink); color: #fff; }
+  .seg button:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+  .hint {
+    position: absolute; right: 14px; bottom: 18px; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transform: translate(-50%, -140%);
+    background: var(--navy); color: #fff; padding: 7px 11px; font-size: 13px; line-height: 1.3;
+    white-space: nowrap; transition: opacity 120ms linear;
+  }
+  .tip b { display: block; color: var(--pink); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+  .tip.on { opacity: 1; }
+  .fail { position: absolute; inset: 0; margin: 0; padding: 24px; display: flex; align-items: center; color: var(--muted); }
+
+  /* Cut table */
+  table { width: 100%; border-collapse: collapse; }
+  caption { text-align: left; }
+  th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+    border-bottom: 2px solid var(--navy); font-weight: 700;
+  }
+  td.key { width: 42px; padding-left: 0; }
+  th.key { width: 42px; padding-left: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
+  tbody td { font-weight: 400; }
+  tbody td.name { font-weight: 700; }
+  .swatch {
+    display: block; width: 26px; height: 26px; color: #fff;
+    font-size: 12px; font-weight: 700; line-height: 26px; text-align: center;
+  }
+
+  /* Cutting layout */
+  .board { position: relative; height: 62px; background: var(--wash); border: 1px solid var(--line); }
+  .pc {
+    position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff;
+  }
+  .pc.spare {
+    color: var(--muted); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    background: repeating-linear-gradient(45deg, transparent 0 7px, var(--line) 7px 8px);
+  }
+
+  .guide { width: 100%; height: auto; display: block; margin-top: 4px; }
+
+  /* Pilot hole guides */
+  .pilot { display: grid; gap: 30px; margin-top: 6px; }
+  .card { border: 1px solid var(--line); padding: 16px 16px 8px; }
+  .card h3 { font-size: 13px; font-weight: 700; margin: 0; letter-spacing: 0.02em; }
+  .card .cap { margin: 2px 0 4px; font-size: 12px; color: var(--muted); }
+  .card svg { width: 100%; height: auto; display: block; }
+  .bar { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+  .replay {
+    border: 1px solid var(--navy); background: var(--paper); color: var(--navy); font: inherit;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 8px 14px; cursor: pointer;
+  }
+  .replay:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
+  .replay:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+  ol.steps { margin: 18px 0 0; padding-left: 20px; font-size: 14px; }
+  ol.steps li { margin-bottom: 7px; }
+  ol.steps li::marker { color: var(--pink); font-weight: 700; }
+  .asm { display: grid; gap: 14px; margin-top: 4px; }
+  .step { border: 1px solid var(--line); border-left: 4px solid var(--pink); padding: 14px 16px; }
+  .step h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
+  .step h3 span { color: var(--pink); margin-right: 8px; }
+  .vice {
+    display: inline-block; background: var(--navy); color: #fff; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 9px; margin-bottom: 8px;
+  }
+  .step p { margin: 0; font-size: 14px; }
+  .lede { margin: 0 0 16px; font-size: 14px; color: var(--muted); max-width: 62ch; }
+
+  .pilot .draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .pilot.go .draw { animation: dr 1.15s ease forwards; animation-delay: var(--d); }
+  @keyframes dr { to { stroke-dashoffset: 0; } }
+  .pilot .fade { opacity: 0; }
+  .pilot.go .fade { animation: fd 0.75s ease forwards; animation-delay: var(--d); }
+  @keyframes fd { to { opacity: 1; } }
+  .pilot .pop { opacity: 0; transform: scale(0.2); transform-box: fill-box; transform-origin: center; }
+  .pilot.go .pop { animation: pp 0.7s cubic-bezier(0.2, 1.3, 0.4, 1) forwards; animation-delay: var(--d); }
+  @keyframes pp { to { opacity: 1; transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) {
+    .pilot .draw { stroke-dashoffset: 0; }
+    .pilot .fade { opacity: 1; }
+    .pilot .pop { opacity: 1; transform: none; }
+    .pilot.go *, .pilot * { animation: none !important; }
+  }
+
+</style>
+</head>
+<body>
+<main>
+  <div class="rule"></div>
+  <h1>Nest box with a slanted roof</h1>
+
+  <div class="stage" id="stage">
+    <canvas id="c" tabindex="0" aria-label="3D model of the nest box. Drag to turn, pinch or scroll to zoom, hover or tap a part to see its size."></canvas>
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" data-mode="assembled" aria-pressed="true">Assembled</button>
+      <button type="button" data-mode="exploded" aria-pressed="false">Exploded</button>
+    </div>
+    <div class="hint">Drag to turn &middot; tap a part for its size</div>
+    <div class="tip" id="tip" aria-live="polite"></div>
+  </div>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Cut list</h2>
+    <table>
+      <thead>
+        <tr>
+          <th class="key" scope="col"></th>
+          <th scope="col">Part</th>
+          <th scope="col">Size</th>
+          <th class="num" scope="col">Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="key"><span class="swatch" style="background:#1b1f45">A</span></td><td class="name">Back</td><td>140 &times; 245 &times; 12 mm</td><td class="num">1</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#343a6e">B</span></td><td class="name">Front</td><td>140 &times; 150 &times; 12 mm</td><td class="num">1</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#4e5590">C</span></td><td class="name">Roof</td><td>140 &times; 190 &times; 12 mm</td><td class="num">1</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#8a8fb5">D</span></td><td class="name">Floor</td><td>140 &times; 140 &times; 12 mm</td><td class="num">1</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#ea008a">E</span></td><td class="name">Side blank</td><td>140 &times; 293 &times; 12 mm</td><td class="num">1</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#f05fae">F</span></td><td class="name">Dowel</td><td>&#216;12.7 &times; 70 mm</td><td class="num">1</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Cutting layout</h2>
+    <div class="board" role="img" aria-label="Board layout from left to right: back, front, roof, floor, side blank, then 170 millimetres spare.">
+      <span class="pc" style="left:0%;width:20.42%;background:#1b1f45">A</span>
+      <span class="pc" style="left:20.67%;width:12.5%;background:#343a6e">B</span>
+      <span class="pc" style="left:33.42%;width:15.83%;background:#4e5590">C</span>
+      <span class="pc" style="left:49.5%;width:11.67%;background:#8a8fb5">D</span>
+      <span class="pc" style="left:61.42%;width:24.42%;background:#ea008a">E</span>
+      <span class="pc spare" style="left:85.83%;width:14.17%">spare</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Cutting the side blank</h2>
+    <svg class="guide" viewBox="0 0 560 830" role="img"
+         aria-label="Three step guide. Step one, the side blank measures 293 by 140 millimetres. Step two, mark 160 millimetres along the top edge and 130 millimetres along the bottom edge, then join the marks. Step three, cutting the line gives two matching trapezoids, 160 millimetres tall at the back and 130 at the front.">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#1b1f45"/>
+        </marker>
+        <marker id="arp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#ea008a"/>
+        </marker>
+        <pattern id="hatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="#d7d9e4" stroke-width="3"/>
+        </pattern>
+      </defs>
+      <g font-family="Helvetica, Arial, sans-serif" fill="#1b1f45">
+
+        <!-- STEP 1 -->
+        <text x="70" y="26" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">STEP 1</text>
+        <text x="130" y="26" font-size="13">Start with the full side blank</text>
+        <rect x="70" y="72" width="396" height="189" fill="#f4f5f9" stroke="#1b1f45" stroke-width="2"/>
+        <line x1="70" y1="56" x2="466" y2="56" stroke="#1b1f45" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+        <rect x="245" y="46" width="46" height="20" fill="#fff"/>
+        <text x="268" y="61" font-size="13" text-anchor="middle">293</text>
+        <line x1="52" y1="72" x2="52" y2="261" stroke="#1b1f45" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+        <rect x="32" y="156" width="40" height="20" fill="#fff"/>
+        <text x="52" y="171" font-size="13" text-anchor="middle">140</text>
+
+        <!-- STEP 2 -->
+        <text x="70" y="326" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">STEP 2</text>
+        <text x="130" y="326" font-size="13">Mark 160 on one edge, 130 on the other, then join</text>
+        <rect x="70" y="372" width="396" height="189" fill="#f4f5f9" stroke="#1b1f45" stroke-width="2"/>
+        <!-- 160 along the top edge -->
+        <line x1="70" y1="356" x2="286" y2="356" stroke="#1b1f45" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+        <line x1="286" y1="348" x2="286" y2="372" stroke="#1b1f45" stroke-width="1"/>
+        <rect x="155" y="346" width="46" height="20" fill="#fff"/>
+        <text x="178" y="361" font-size="13" text-anchor="middle">160</text>
+        <!-- 130 along the bottom edge -->
+        <line x1="70" y1="585" x2="245" y2="585" stroke="#1b1f45" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+        <line x1="245" y1="561" x2="245" y2="593" stroke="#1b1f45" stroke-width="1"/>
+        <rect x="135" y="575" width="46" height="20" fill="#fff"/>
+        <text x="158" y="590" font-size="13" text-anchor="middle">130</text>
+        <!-- cut line -->
+        <line x1="286" y1="372" x2="245" y2="561" stroke="#ea008a" stroke-width="2.5" stroke-dasharray="9 6"/>
+        <circle cx="286" cy="372" r="4.5" fill="#ea008a"/>
+        <circle cx="245" cy="561" r="4.5" fill="#ea008a"/>
+        <line x1="352" y1="430" x2="292" y2="452" stroke="#ea008a" stroke-width="1" marker-end="url(#arp)"/>
+        <text x="358" y="434" font-size="12" fill="#ea008a">saw just outside the line</text>
+
+        <!-- STEP 3 -->
+        <text x="70" y="648" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">STEP 3</text>
+        <text x="130" y="648" font-size="13">Two matching trapezoids: 160 at the back, 130 at the front</text>
+        <polygon points="70,694 286,694 245,818 70,818" fill="#f4f5f9" stroke="#1b1f45" stroke-width="2"/>
+        <polygon points="356,694 532,694 532,818 316,818" fill="#f4f5f9" stroke="#1b1f45" stroke-width="2"/>
+        <text x="150" y="682" font-size="12" fill="#6b7091">Side 1</text>
+        <text x="400" y="682" font-size="12" fill="#6b7091">Side 2 (offcut, turned around)</text>
+        <!-- labels on side 1 -->
+        <text x="178" y="712" font-size="13" text-anchor="middle">160</text>
+        <text x="158" y="810" font-size="13" text-anchor="middle">130</text>
+        <text x="62" y="760" font-size="13" text-anchor="end">140</text>
+        <!-- labels on side 2 -->
+        <text x="444" y="712" font-size="13" text-anchor="middle">130</text>
+        <text x="424" y="810" font-size="13" text-anchor="middle">160</text>
+        <text x="540" y="760" font-size="13">140</text>
+      </g>
+    </svg>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Marking out the pilot holes</h2>
+    <p class="lede">All positions are measured from the bottom left corner of each face, looking at the outside face of that part. X runs across the 140 mm width, Y runs up. Every pilot hole is 2.5 mm.</p>
+    <div class="bar">
+      <span class="cap">Square against one edge, mark the line, then step the measurements along it.</span>
+      <button type="button" class="replay" id="replay">Replay</button>
+    </div>
+    <div class="pilot" id="pilot"></div>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Front panel: drilling the entrance and dowel holes</h2>
+    <svg class="guide" viewBox="0 0 760 560" role="img" aria-label="Engineering drawing of the front panel outside face, 140 by 150 millimetres. The 72 millimetre entrance hole is centred 70 from the left edge and 95 up from the bottom edge. The 12.7 millimetre dowel hole is 35 in from the right edge and 40 up from the bottom edge.">
+  <defs>
+    <marker id="eaH" viewBox="0 0 10 4" refX="10" refY="2" markerWidth="9" markerHeight="3.6" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 2 L0 4 z" fill="#1b1f45"/>
+    </marker>
+  </defs>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#1b1f45" stroke-linecap="square">
+
+    <rect x="10" y="10" width="740" height="540" fill="none" stroke="#1b1f45" stroke-width="1.2"/>
+    <rect x="16" y="16" width="728" height="528" fill="none" stroke="#1b1f45" stroke-width="0.5"/>
+
+    <!-- outline -->
+    <rect x="210.0" y="90.0" width="308.0" height="330.0" fill="#fbfbfd" stroke="#1b1f45" stroke-width="1.6"/>
+
+    <!-- holes -->
+    <circle cx="364.0" cy="211.0" r="79.2" fill="#fdf0f7" stroke="#1b1f45" stroke-width="1.6"/>
+    <circle cx="441.0" cy="332.0" r="13.97" fill="#fdf0f7" stroke="#1b1f45" stroke-width="1.6"/>
+
+    <!-- centre lines -->
+    <g stroke="#1b1f45" stroke-width="0.6" fill="none" stroke-dasharray="20 3 5 3">
+      <line x1="364.0" y1="52" x2="364.0" y2="304.2"/>
+      <line x1="128" y1="211.0" x2="457.2" y2="211.0"/>
+      <line x1="441.0" y1="304.03" x2="441.0" y2="468"/>
+      <line x1="413.03" y1="332.0" x2="586" y2="332.0"/>
+    </g>
+
+    <!-- extension lines -->
+    <g stroke="#1b1f45" stroke-width="0.5">
+      <line x1="210.0" y1="86.0" x2="210.0" y2="24"/>
+      <line x1="518.0" y1="86.0" x2="518.0" y2="24"/>
+      <line x1="206.0" y1="420.0" x2="112" y2="420.0"/>
+      <line x1="206.0" y1="90.0" x2="112" y2="90.0"/>
+      <line x1="522.0" y1="420.0" x2="586" y2="420.0"/>
+      <line x1="518.0" y1="424.0" x2="518.0" y2="468"/>
+    </g>
+
+    <!-- 140 overall -->
+    <line x1="210.0" y1="34" x2="518.0" y2="34" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)" marker-end="url(#eaH)"/>
+    <text x="364.0" y="28" font-size="13" text-anchor="middle">140</text>
+    <!-- 70 to the entrance centre -->
+    <line x1="210.0" y1="62" x2="364.0" y2="62" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)" marker-end="url(#eaH)"/>
+    <text x="287.0" y="56" font-size="13" text-anchor="middle">70</text>
+
+    <!-- 150 overall -->
+    <line x1="122" y1="420.0" x2="122" y2="90.0" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)" marker-end="url(#eaH)"/>
+    <text transform="rotate(-90 116 255.0)" x="116" y="255.0" font-size="13" text-anchor="middle">150</text>
+    <!-- 95 to the entrance centre -->
+    <line x1="150" y1="420.0" x2="150" y2="211.0" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)" marker-end="url(#eaH)"/>
+    <text transform="rotate(-90 144 315.5)" x="144" y="315.5" font-size="13" text-anchor="middle">95</text>
+
+    <!-- 40 to the dowel centre -->
+    <line x1="570" y1="420.0" x2="570" y2="332.0" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)" marker-end="url(#eaH)"/>
+    <text transform="rotate(-90 564 376.0)" x="564" y="376.0" font-size="13" text-anchor="middle">40</text>
+
+    <!-- 35 from the right edge to the dowel centre -->
+    <line x1="441.0" y1="452" x2="518.0" y2="452" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)" marker-end="url(#eaH)"/>
+    <text x="479.5" y="446" font-size="13" text-anchor="middle">35</text>
+
+    <!-- diameter leaders -->
+    <path d="M 428.9 165.5 L 560 120 L 616 120" fill="none" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)"/>
+    <text x="562" y="114" font-size="13" font-weight="bold">&#216;72</text>
+    <path d="M 450.9 341.9 L 600 455 L 660 455" fill="none" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#eaH)"/>
+    <text x="602" y="449" font-size="13" font-weight="bold">&#216;12.7</text>
+
+  </g>
+</svg>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Assembly</h2>
+    <p class="lede">Work in this order. The part named in each step is the one clamped in the vice, and screws are always driven into its edge. Hole labels match the marking out diagrams above.</p>
+    <div class="asm"><div class="step"><h3><span>1</span>Floor to back</h3><span class="vice">In the vice: Floor (D)</span><p>Grip the floor in the vice with one 140 mm edge facing up. Stand the back against that edge, bottom edges flush, and drive two screws through A1 and A2 into the floor edge.</p><p class="cap" style="margin-top:6px">Pilot holes used: A1 and A2 on the back.</p></div><div class="step"><h3><span>2</span>Sides to back</h3><span class="vice">In the vice: Side (E), one at a time</span><p>Grip a side in the vice with its 160 mm back edge facing up. Lay the back across it, flush at the corner, and drive two screws through the back into that edge. Repeat for the second side.</p><p class="cap" style="margin-top:6px">Pilot holes used: A3 to A6 on the back, two per side.</p></div><div class="step"><h3><span>3</span>Front on</h3><span class="vice">In the vice: The part built box, held by the back panel</span><p>Grip the assembly in the vice so the front edges of the sides and floor face up. Sit the front in place and drive six screws: four into the side edges, two into the floor edge.</p><p class="cap" style="margin-top:6px">Pilot holes used: B3 to B6 into the sides, B1 and B2 into the floor.</p></div><div class="step"><h3><span>4</span>Roof last</h3><span class="vice">In the vice: The assembled box, held by the back panel</span><p>Grip the box so the sloped top edges of the sides face up. Sit the roof on so its back edge meets the back panel, then drive four screws. No glue, so the roof lifts off for cleaning.</p><p class="cap" style="margin-top:6px">Pilot holes used: C1 to C4 on the roof.</p></div></div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('c');
+  var tip = document.getElementById('tip');
+  try {
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    run(renderer);
+  } catch (err) {
+    stage.insertAdjacentHTML('beforeend', '<p class="fail">The 3D view needs WebGL, which is not available in this browser. The cut list below still works.</p>');
+  }
+
+  function run(renderer) {
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(34, 1, 10, 4000);
+    var dirty = true;
+
+    var SLOPE = 30 / 140;
+    var ALPHA = Math.atan(SLOPE);
+
+    function makeWood() {
+      var c = document.createElement('canvas');
+      c.width = 256; c.height = 512;
+      var g = c.getContext('2d');
+      g.fillStyle = '#e2c48f';
+      g.fillRect(0, 0, 256, 512);
+      var i, k;
+      for (i = 0; i < 150; i++) {
+        var x = Math.random() * 256;
+        var w = 0.5 + Math.random() * 2.2;
+        var amp = 1 + Math.random() * 3;
+        var ph = Math.random() * 6.28;
+        var cyc = 1 + Math.floor(Math.random() * 2);
+        g.strokeStyle = 'rgba(' + (145 + Math.random() * 35 | 0) + ',' + (100 + Math.random() * 30 | 0) + ',55,' + (0.07 + Math.random() * 0.2).toFixed(3) + ')';
+        g.lineWidth = w;
+        g.beginPath();
+        for (k = 0; k <= 512; k += 16) {
+          var xx = x + Math.sin(k / 512 * 6.2832 * cyc + ph) * amp;
+          if (k === 0) g.moveTo(xx, k); else g.lineTo(xx, k);
+        }
+        g.stroke();
+      }
+      var t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.encoding = THREE.sRGBEncoding;
+      t.anisotropy = 4;
+      return t;
+    }
+    var wood = makeWood();
+
+    function mapUV(geom, grain) {
+      var pos = geom.attributes.position, nor = geom.attributes.normal;
+      var uv = new Float32Array(pos.count * 2);
+      var S = 1 / 150;
+      var gi = { x: 0, y: 1, z: 2 }[grain];
+      for (var i = 0; i < pos.count; i++) {
+        var p = [pos.getX(i), pos.getY(i), pos.getZ(i)];
+        var n = [Math.abs(nor.getX(i)), Math.abs(nor.getY(i)), Math.abs(nor.getZ(i))];
+        var d = 0;
+        if (n[1] > n[d]) d = 1;
+        if (n[2] > n[d]) d = 2;
+        var axes = [0, 1, 2].filter(function (a) { return a !== d; });
+        var u, v;
+        if (axes.indexOf(gi) !== -1) {
+          v = p[gi];
+          u = p[axes[0] === gi ? axes[1] : axes[0]];
+        } else {
+          u = p[axes[0]]; v = p[axes[1]];
+        }
+        uv[2 * i] = u * S; uv[2 * i + 1] = v * S;
+      }
+      geom.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    }
+
+    function woodMesh(geo, grain, tint) {
+      mapUV(geo, grain);
+      var m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: wood, color: tint, roughness: 0.9, metalness: 0 }));
+      m.castShadow = true; m.receiveShadow = true;
+      return m;
+    }
+
+    function boxGeo(x0, x1, y0, y1, z0, z1) {
+      var g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
+      g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+      return g;
+    }
+
+    function plateGeo(w, y0, y1, holes, z0, depth) {
+      var s = new THREE.Shape();
+      s.moveTo(0, y0); s.lineTo(w, y0); s.lineTo(w, y1); s.lineTo(0, y1);
+      (holes || []).forEach(function (h) {
+        var p = new THREE.Path();
+        p.absarc(h[0], h[1], h[2], 0, Math.PI * 2, true);
+        s.holes.push(p);
+      });
+      var g = new THREE.ExtrudeGeometry(s, { depth: depth, bevelEnabled: false, curveSegments: 48 });
+      g.translate(0, 0, z0);
+      return g;
+    }
+
+    function prismGeo(pts, x0, x1) {
+      var s = new THREE.Shape();
+      pts.forEach(function (p, i) { if (i) s.lineTo(p[0], p[1]); else s.moveTo(p[0], p[1]); });
+      var g = new THREE.ExtrudeGeometry(s, { depth: x1 - x0, bevelEnabled: false });
+      g.rotateY(-Math.PI / 2);
+      g.translate(x1, 0, 0);
+      return g;
+    }
+
+    var screwMat = new THREE.MeshStandardMaterial({ color: 0x484d50, metalness: 0.7, roughness: 0.4 });
+    function screwZ(x, y, z) {
+      var m = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 1.4, 16), screwMat);
+      m.rotation.x = Math.PI / 2;
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      return m;
+    }
+
+    var movers = [];
+    var pickable = [];
+    var root = new THREE.Group();
+    scene.add(root);
+
+    function part(base, off, label, size) {
+      var g = new THREE.Group();
+      g.position.set(base[0], base[1], base[2]);
+      g.userData = {
+        base: new THREE.Vector3(base[0], base[1], base[2]),
+        off: new THREE.Vector3(off[0], off[1], off[2]),
+        label: label, size: size
+      };
+      root.add(g); movers.push(g);
+      return g;
+    }
+    function pick(group, mesh) {
+      mesh.userData.owner = group;
+      pickable.push(mesh);
+      group.add(mesh);
+    }
+
+    // Back (A)
+    var back = part([0, 0, 0], [0, 0, 0], 'A  Back', '140 \u00d7 245 \u00d7 12 mm');
+    pick(back, woodMesh(plateGeo(140, 0, 245, [[70, 15, 2.5], [70, 230, 2.5]], 0, 12), 'y', 0xf1dcb6));
+    [[6, 75], [134, 75], [6, 150], [134, 150], [35, 39], [105, 39]].forEach(function (p) {
+      back.add(screwZ(p[0], p[1], -0.7));
+    });
+
+    // Floor (D)
+    var floor = part([0, 0, 0], [0, -60, 0], 'D  Floor', '140 \u00d7 140 \u00d7 12 mm');
+    pick(floor, woodMesh(boxGeo(0, 140, 33, 45, 12, 152), 'x', 0xf6e6c8));
+
+    // Sides (E)
+    var sidePts = [[12, 45], [152, 45], [152, 175], [12, 205]];
+    var left = part([0, 0, 0], [-70, 0, 0], 'E  Side (left)', '140 deep, 160 back / 130 front, 12 mm');
+    pick(left, woodMesh(prismGeo(sidePts, 0, 12), 'y', 0xf4e1bd));
+    var right = part([0, 0, 0], [70, 0, 0], 'E  Side (right)', '140 deep, 160 back / 130 front, 12 mm');
+    pick(right, woodMesh(prismGeo(sidePts, 128, 140), 'y', 0xecd5ab));
+
+    // Front (B): entrance hole 72 mm, centred 95 above the bottom edge; dowel hole 12.7 mm
+    var front = part([0, 0, 0], [0, 0, 80], 'B  Front', '140 \u00d7 150 \u00d7 12 mm, \u00d872 entrance');
+    var fg = plateGeo(140, 25, 175, [[70, 120, 36], [105, 65, 6.35]], 152, 12);
+    var fp = fg.attributes.position;
+    for (var i = 0; i < fp.count; i++) {
+      if (Math.abs(fp.getY(i) - 175) < 0.001) fp.setY(i, 175 - (fp.getZ(i) - 152) * SLOPE);
+    }
+    fp.needsUpdate = true;
+    fg.computeVertexNormals();
+    pick(front, woodMesh(fg, 'y', 0xf3dfba));
+    [[6, 75], [134, 75], [6, 150], [134, 150], [35, 39], [105, 39]].forEach(function (p) {
+      front.add(screwZ(p[0], p[1], 164.7));
+    });
+
+    // Dowel (F)
+    var dowel = part([0, 0, 0], [0, 0, 165], 'F  Dowel', '\u00d812.7 \u00d7 70 mm');
+    var dg = new THREE.CylinderGeometry(6.35, 6.35, 70, 28);
+    dg.rotateX(Math.PI / 2);
+    dg.translate(105, 65, 187);
+    pick(dowel, woodMesh(dg, 'z', 0xe8d0a0));
+
+    // Roof (C)
+    var roof = part([0, 205, 12], [0, 85, 30], 'C  Roof', '140 \u00d7 190 \u00d7 12 mm');
+    roof.rotation.x = ALPHA;
+    pick(roof, woodMesh(boxGeo(0, 140, 0, 12, 0, 190), 'z', 0xe9d1a4));
+    [[6, 38], [134, 38], [6, 108], [134, 108]].forEach(function (p) {
+      var m = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 1.4, 16), screwMat);
+      m.position.set(p[0], 12.7, p[1]);
+      m.castShadow = true;
+      roof.add(m);
+    });
+
+    var ground = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600), new THREE.ShadowMaterial({ opacity: 0.16 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.set(70, -1, 99);
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    var target = new THREE.Vector3(70, 118, 99);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a7a62, 0.72));
+    var sun = new THREE.DirectionalLight(0xffffff, 0.95);
+    sun.position.set(300, 560, 460);
+    sun.target.position.copy(target);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    var sc = sun.shadow.camera;
+    sc.left = -380; sc.right = 380; sc.top = 380; sc.bottom = -380; sc.near = 50; sc.far = 1800;
+    sun.shadow.bias = -0.0006;
+    sun.shadow.normalBias = 0.6;
+    scene.add(sun); scene.add(sun.target);
+    var fill = new THREE.DirectionalLight(0xfff4e0, 0.35);
+    fill.position.set(-360, 200, -260);
+    scene.add(fill);
+
+    var theta = 0.72, phi = 1.3, radius = 580;
+    var expl = 0, explTarget = 0;
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function updateCam() {
+      var r = radius * (1 + 0.32 * expl);
+      camera.position.set(
+        target.x + r * Math.sin(phi) * Math.sin(theta),
+        target.y + r * Math.cos(phi),
+        target.z + r * Math.sin(phi) * Math.cos(theta)
+      );
+      camera.lookAt(target);
+      dirty = true;
+    }
+    function applyExpl() {
+      movers.forEach(function (g) {
+        g.position.copy(g.userData.base).addScaledVector(g.userData.off, expl);
+      });
+      updateCam();
+    }
+
+    // ---- Part highlighting and measurement label
+    var ray = new THREE.Raycaster();
+    var ndc = new THREE.Vector2();
+    var active = null;
+    function setActive(group) {
+      if (active === group) return;
+      pickable.forEach(function (m) {
+        var on = group && m.userData.owner === group;
+        m.material.emissive.setHex(on ? 0xea008a : 0x000000);
+        m.material.emissiveIntensity = on ? 0.38 : 0;
+      });
+      active = group;
+      if (group) {
+        tip.innerHTML = '<b>' + group.userData.label + '</b>' + group.userData.size;
+        tip.classList.add('on');
+      } else {
+        tip.classList.remove('on');
+      }
+      dirty = true;
+    }
+    function hover(clientX, clientY) {
+      var r = canvas.getBoundingClientRect();
+      ndc.x = ((clientX - r.left) / r.width) * 2 - 1;
+      ndc.y = -((clientY - r.top) / r.height) * 2 + 1;
+      ray.setFromCamera(ndc, camera);
+      var hits = ray.intersectObjects(pickable, false);
+      if (hits.length) {
+        setActive(hits[0].object.userData.owner);
+        tip.style.left = (clientX - r.left) + 'px';
+        tip.style.top = (clientY - r.top) + 'px';
+      } else {
+        setActive(null);
+      }
+    }
+
+    var ptrs = new Map(), lastDist = 0, moved = false;
+    function pinchDist() {
+      var a = Array.from(ptrs.values());
+      return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1;
+    }
+    canvas.addEventListener('pointerdown', function (e) {
+      canvas.setPointerCapture(e.pointerId);
+      ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      moved = false;
+      if (ptrs.size === 2) lastDist = pinchDist();
+      if (e.pointerType !== 'mouse') hover(e.clientX, e.clientY);
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      var p = ptrs.get(e.pointerId);
+      if (!p) { if (e.pointerType === 'mouse') hover(e.clientX, e.clientY); return; }
+      var dx = e.clientX - p.x, dy = e.clientY - p.y;
+      p.x = e.clientX; p.y = e.clientY;
+      if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+      if (moved) setActive(null);
+      if (ptrs.size === 1) {
+        theta -= dx * 0.008;
+        phi = clamp(phi - dy * 0.008, 0.2, 2.9);
+        updateCam();
+      } else if (ptrs.size === 2) {
+        var d = pinchDist();
+        radius = clamp(radius * lastDist / d, 260, 1000);
+        lastDist = d;
+        updateCam();
+      }
+    });
+    function endPtr(e) { ptrs.delete(e.pointerId); }
+    canvas.addEventListener('pointerup', endPtr);
+    canvas.addEventListener('pointercancel', endPtr);
+    canvas.addEventListener('pointerleave', function () { setActive(null); });
+    canvas.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      radius = clamp(radius * (1 + e.deltaY * 0.001), 260, 1000);
+      updateCam();
+    }, { passive: false });
+    canvas.addEventListener('keydown', function (e) {
+      var used = true;
+      if (e.key === 'ArrowLeft') theta -= 0.12;
+      else if (e.key === 'ArrowRight') theta += 0.12;
+      else if (e.key === 'ArrowUp') phi = clamp(phi - 0.1, 0.2, 2.9);
+      else if (e.key === 'ArrowDown') phi = clamp(phi + 0.1, 0.2, 2.9);
+      else used = false;
+      if (used) { e.preventDefault(); updateCam(); }
+    });
+
+    var btns = document.querySelectorAll('.seg button');
+    Array.prototype.forEach.call(btns, function (b) {
+      b.addEventListener('click', function () {
+        explTarget = b.getAttribute('data-mode') === 'exploded' ? 1 : 0;
+        setActive(null);
+        if (reduced) { expl = explTarget; applyExpl(); }
+        Array.prototype.forEach.call(btns, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      });
+    });
+
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      dirty = true;
+    }
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+    window.addEventListener('resize', resize);
+
+    function frame() {
+      if (expl !== explTarget) {
+        var d = explTarget - expl;
+        expl = Math.abs(d) < 0.002 ? explTarget : expl + d * 0.14;
+        applyExpl();
+      }
+      if (dirty) { renderer.render(scene, camera); dirty = false; }
+      requestAnimationFrame(frame);
+    }
+    resize();
+    applyExpl();
+    frame();
+  }
+})();
+</script>
+
+<script>
+(function () {
+  var PARTS = [
+    { key: 'A', name: 'Back', w: 140, h: 245, colour: '#1b1f45', yFrom: 'bottom edge',
+      rows: [
+        { y: 39, xs: [35, 105], note: 'into the floor' },
+        { y: 75, xs: [6, 134], note: 'into the sides' },
+        { y: 150, xs: [6, 134], note: 'into the sides' }
+      ] },
+    { key: 'B', name: 'Front', w: 140, h: 150, colour: '#343a6e', yFrom: 'bottom edge',
+      rows: [
+        { y: 14, xs: [35, 105], note: 'into the floor' },
+        { y: 50, xs: [6, 134], note: 'into the sides' },
+        { y: 125, xs: [6, 134], note: 'into the sides' }
+      ] },
+    { key: 'C', name: 'Roof', w: 140, h: 190, colour: '#4e5590', yFrom: 'back edge, the one that sits against the back panel',
+      rows: [
+        { y: 38, xs: [6, 134], note: 'into the top edges of the sides' },
+        { y: 108, xs: [6, 134], note: 'into the top edges of the sides' }
+      ] }
+  ];
+
+  var NAVY = '#1b1f45', PINK = '#ea008a', MUTED = '#6b7091', LINE = '#d7d9e4', WASH = '#f4f5f9';
+
+  function esc(n) { return Math.round(n * 100) / 100; }
+
+  function build(part, idx) {
+    var s = 1.8;
+    var rows = part.rows.slice().sort(function (a, b) { return a.y - b.y; });
+
+    var xs = [];
+    rows.forEach(function (r) { r.xs.forEach(function (x) { if (xs.indexOf(x) === -1) xs.push(x); }); });
+    xs.sort(function (a, b) { return a - b; });
+    var xTop = {};
+    xs.forEach(function (x) {
+      var m = 0;
+      rows.forEach(function (r) { if (r.xs.indexOf(x) !== -1) m = Math.max(m, r.y); });
+      xTop[x] = m;
+    });
+
+    var ML = 30 + rows.length * 20;
+    var MR = 46, MT = 34;
+    var MB = 34 + xs.length * 20;
+    var PW = part.w * s, PH = part.h * s;
+    var VW = ML + PW + MR, VH = MT + PH + MB;
+    function px(x) { return ML + x * s; }
+    function py(y) { return MT + (part.h - y) * s; }
+
+    var T1 = 0.9 + rows.length * 1.0;
+    var T2 = T1 + 0.7 + xs.length * 0.9;
+    var uid = 'p' + idx;
+    var o = [];
+
+    o.push('<svg viewBox="0 0 ' + esc(VW) + ' ' + esc(VH) + '" role="img" aria-label="Marking out guide for the ' +
+      part.name.toLowerCase() + ' panel, showing pilot hole positions.">');
+    o.push('<defs><marker id="' + uid + 'a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
+      '<path d="M0 0 L10 5 L0 10 z" fill="' + NAVY + '"/></marker></defs>');
+    o.push('<g font-family="Helvetica, Arial, sans-serif" fill="' + NAVY + '">');
+
+    // panel
+    o.push('<rect x="' + esc(px(0)) + '" y="' + esc(py(part.h)) + '" width="' + esc(PW) + '" height="' + esc(PH) +
+      '" fill="' + WASH + '" stroke="' + NAVY + '" stroke-width="2"/>');
+
+    // Y dimensions on the left
+    rows.forEach(function (r, i) {
+      var dx = px(0) - 14 - i * 20;
+      var ya = py(0), yb = py(r.y), tightY = Math.abs(ya - yb) < 42;
+      o.push('<g class="fade" style="--d:' + esc(0.2 + i * 0.4) + 's">');
+      if (tightY) {
+        o.push('<line x1="' + esc(dx) + '" y1="' + esc(ya) + '" x2="' + esc(dx) + '" y2="' + esc(yb) +
+          '" stroke="' + NAVY + '" stroke-width="1"/>');
+        o.push('<line x1="' + esc(dx) + '" y1="' + esc(ya + 26) + '" x2="' + esc(dx) + '" y2="' + esc(ya) +
+          '" stroke="' + NAVY + '" stroke-width="1" marker-end="url(#' + uid + 'a)"/>');
+        o.push('<line x1="' + esc(dx) + '" y1="' + esc(yb - 26) + '" x2="' + esc(dx) + '" y2="' + esc(yb) +
+          '" stroke="' + NAVY + '" stroke-width="1" marker-end="url(#' + uid + 'a)"/>');
+      } else {
+        o.push('<line x1="' + esc(dx) + '" y1="' + esc(ya) + '" x2="' + esc(dx) + '" y2="' + esc(yb) +
+          '" stroke="' + NAVY + '" stroke-width="1" marker-start="url(#' + uid + 'a)" marker-end="url(#' + uid + 'a)"/>');
+      }
+      o.push('<rect x="' + esc(dx - 11) + '" y="' + esc((ya + yb) / 2 - 9) + '" width="22" height="18" fill="#fff"/>');
+      o.push('<text x="' + esc(dx) + '" y="' + esc((ya + yb) / 2 + 4) + '" font-size="12" text-anchor="middle">' + r.y + '</text>');
+      o.push('</g>');
+    });
+
+    // horizontal lines
+    rows.forEach(function (r, i) {
+      o.push('<line class="draw" style="--d:' + esc(0.9 + i * 1.0) + 's" pathLength="1" x1="' + esc(px(0)) +
+        '" y1="' + esc(py(r.y)) + '" x2="' + esc(px(part.w)) + '" y2="' + esc(py(r.y)) +
+        '" stroke="' + NAVY + '" stroke-width="1.2" stroke-dasharray="1"/>');
+    });
+
+    // vertical lines
+    xs.forEach(function (x, i) {
+      o.push('<line class="draw" style="--d:' + esc(T1 + 0.7 + i * 0.9) + 's" pathLength="1" x1="' + esc(px(x)) +
+        '" y1="' + esc(py(0)) + '" x2="' + esc(px(x)) + '" y2="' + esc(py(xTop[x])) +
+        '" stroke="' + NAVY + '" stroke-width="1.2" stroke-dasharray="1"/>');
+    });
+
+    // X dimensions below
+    xs.forEach(function (x, i) {
+      var dy = py(0) + 20 + i * 20;
+      var xa = px(0), xb = px(x), tightX = (xb - xa) < 42;
+      o.push('<g class="fade" style="--d:' + esc(T1 + 0.9 + i * 0.4) + 's">');
+      o.push('<line x1="' + esc(xa) + '" y1="' + esc(py(0)) + '" x2="' + esc(xa) + '" y2="' + esc(dy + 8) +
+        '" stroke="' + LINE + '" stroke-width="0.8"/>');
+      o.push('<line x1="' + esc(xb) + '" y1="' + esc(py(0)) + '" x2="' + esc(xb) + '" y2="' + esc(dy + 8) +
+        '" stroke="' + LINE + '" stroke-width="0.8"/>');
+      if (tightX) {
+        o.push('<line x1="' + esc(xa) + '" y1="' + esc(dy) + '" x2="' + esc(xb) + '" y2="' + esc(dy) +
+          '" stroke="' + NAVY + '" stroke-width="1"/>');
+        o.push('<line x1="' + esc(xa - 28) + '" y1="' + esc(dy) + '" x2="' + esc(xa) + '" y2="' + esc(dy) +
+          '" stroke="' + NAVY + '" stroke-width="1" marker-end="url(#' + uid + 'a)"/>');
+        o.push('<line x1="' + esc(xb + 28) + '" y1="' + esc(dy) + '" x2="' + esc(xb) + '" y2="' + esc(dy) +
+          '" stroke="' + NAVY + '" stroke-width="1" marker-end="url(#' + uid + 'a)"/>');
+        o.push('<text x="' + esc(xb + 34) + '" y="' + esc(dy + 4) + '" font-size="12" text-anchor="start">' + x + '</text>');
+      } else {
+        o.push('<line x1="' + esc(xa) + '" y1="' + esc(dy) + '" x2="' + esc(xb) + '" y2="' + esc(dy) +
+          '" stroke="' + NAVY + '" stroke-width="1" marker-start="url(#' + uid + 'a)" marker-end="url(#' + uid + 'a)"/>');
+        o.push('<rect x="' + esc((xa + xb) / 2 - 12) + '" y="' + esc(dy - 9) + '" width="24" height="18" fill="#fff"/>');
+        o.push('<text x="' + esc((xa + xb) / 2) + '" y="' + esc(dy + 4) + '" font-size="12" text-anchor="middle">' + x + '</text>');
+      }
+      o.push('</g>');
+    });
+
+    // dots
+    var n = 0;
+    rows.forEach(function (r) {
+      r.labels = [];
+      r.xs.forEach(function (x) {
+        var d = T2 + 0.5 + n * 0.3; n++;
+        var id = part.key + n;
+        r.labels.push(id);
+        var side = x > part.w / 2 ? -1 : 1;
+        o.push('<g class="pop" style="--d:' + esc(d) + 's">');
+        o.push('<circle cx="' + esc(px(x)) + '" cy="' + esc(py(r.y)) + '" r="9" fill="' + PINK + '" opacity="0.18"/>');
+        o.push('<circle cx="' + esc(px(x)) + '" cy="' + esc(py(r.y)) + '" r="4.2" fill="' + PINK + '"/>');
+        o.push('<rect x="' + esc(px(x) + (side > 0 ? 10 : -34)) + '" y="' + esc(py(r.y) - 24) + '" width="24" height="16" fill="#fff"/>');
+        o.push('<text x="' + esc(px(x) + side * 11) + '" y="' + esc(py(r.y) - 11) + '" font-size="12" font-weight="bold" text-anchor="' +
+          (side > 0 ? 'start' : 'end') + '">' + id + '</text>');
+        o.push('</g>');
+      });
+    });
+
+    o.push('<text class="fade" style="--d:' + esc(T2 + 0.5 + n * 0.3) + 's" x="' + esc(px(part.w) + 8) +
+      '" y="' + esc(py(rows[rows.length - 1].y) + 4) + '" font-size="11" fill="' + PINK + '" font-weight="bold">\u00d82.5</text>');
+    o.push('</g></svg>');
+
+    var notes = rows.map(function (r) { return r.labels.join(' and ') + ' ' + r.note; }).join('; ');
+    var card = '<div class="card"><h3><span style="color:' + part.colour + '">' + part.key + '</span> &middot; ' +
+      part.name + ', ' + part.w + ' \u00d7 ' + part.h + '</h3>' +
+      '<p class="cap">' + n + ' pilot holes, all \u00d82.5: ' + notes + '. Y is measured from the ' + part.yFrom + '.</p>' +
+      o.join('') + '</div>';
+    return card;
+  }
+
+  var wrap = document.getElementById('pilot');
+  if (!wrap) return;
+  wrap.innerHTML = PARTS.map(build).join('');
+
+  function play() {
+    wrap.classList.remove('go');
+    void wrap.offsetWidth;
+    wrap.classList.add('go');
+  }
+  document.getElementById('replay').addEventListener('click', play);
+
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { play(); io.disconnect(); } });
+    }, { threshold: 0.15 });
+    io.observe(wrap);
+  } else {
+    play();
+  }
+})();
+</script>
+</body>
+</html>
