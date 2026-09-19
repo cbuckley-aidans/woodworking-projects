@@ -272,7 +272,7 @@
   <section>
     <div class="rule"></div>
     <h2>Marking out the pilot holes</h2>
-    <p class="lede">All positions are measured from the bottom left corner of each face, looking at the outside face of that part. X runs across the 140 mm width, Y runs up. Every pilot hole is 2.5 mm.</p>
+    <p class="lede">All positions are measured from the bottom left corner of each face, looking at the outside face of that part. Every pilot hole is 2.5 mm.</p>
     <div class="bar">
       <span class="cap">Square against one edge, mark the line, then step the measurements along it.</span>
       <button type="button" class="replay" id="replay">Replay</button>
@@ -722,19 +722,19 @@
 <script>
 (function () {
   var PARTS = [
-    { key: 'A', name: 'Back', w: 140, h: 245, colour: '#1b1f45', yFrom: 'bottom edge',
+    { key: 'A', name: 'Back', w: 140, h: 245, colour: '#1b1f45', datum: '',
       rows: [
         { y: 39, xs: [35, 105], note: 'into the floor' },
         { y: 75, xs: [6, 134], note: 'into the sides' },
         { y: 150, xs: [6, 134], note: 'into the sides' }
       ] },
-    { key: 'B', name: 'Front', w: 140, h: 150, colour: '#343a6e', yFrom: 'bottom edge',
+    { key: 'B', name: 'Front', w: 140, h: 150, colour: '#343a6e', datum: '',
       rows: [
         { y: 14, xs: [35, 105], note: 'into the floor' },
         { y: 50, xs: [6, 134], note: 'into the sides' },
         { y: 125, xs: [6, 134], note: 'into the sides' }
       ] },
-    { key: 'C', name: 'Roof', w: 140, h: 190, colour: '#4e5590', yFrom: 'back edge, the one that sits against the back panel',
+    { key: 'C', name: 'Roof', w: 140, h: 190, colour: '#4e5590', datum: 'Heights are measured from the back edge, the one that sits against the back panel.',
       rows: [
         { y: 38, xs: [6, 134], note: 'into the top edges of the sides' },
         { y: 108, xs: [6, 134], note: 'into the top edges of the sides' }
@@ -869,7 +869,7 @@
     var notes = rows.map(function (r) { return r.labels.join(' and ') + ' ' + r.note; }).join('; ');
     var card = '<div class="card"><h3><span style="color:' + part.colour + '">' + part.key + '</span> &middot; ' +
       part.name + ', ' + part.w + ' \u00d7 ' + part.h + '</h3>' +
-      '<p class="cap">' + n + ' pilot holes, all \u00d82.5: ' + notes + '. Y is measured from the ' + part.yFrom + '.</p>' +
+      '<p class="cap">' + n + ' pilot holes, all \u00d82.5: ' + notes + '.' + (part.datum ? ' ' + part.datum : '') + '</p>' +
       o.join('') + '</div>';
     return card;
   }
