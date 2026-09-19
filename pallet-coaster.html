@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pallet coaster</title>
+<style>
+  :root {
+    --navy: #1b1f45;
+    --pink: #ea008a;
+    --paper: #ffffff;
+    --ink: #1b1f45;
+    --muted: #6b7091;
+    --line: #d7d9e4;
+    --stage: #eceef4;
+    --wash: #f4f5f9;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  .rule { height: 3px; background: var(--navy); margin: 0 0 14px; }
+  h1 {
+    font-size: clamp(30px, 6vw, 46px); line-height: 1.02; font-weight: 700;
+    letter-spacing: -0.025em; margin: 0 0 12px; max-width: 16ch;
+  }
+  .sub { margin: 0 0 32px; font-size: 14px; color: var(--muted); max-width: 62ch; }
+  h2 {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0 0 10px; color: var(--navy);
+  }
+  section { margin-top: 48px; }
+  section > .rule { margin-bottom: 12px; }
+
+  /* Stage */
+  .stage {
+    position: relative; height: clamp(340px, 72vw, 520px); background: var(--stage);
+    border: 1px solid var(--line);
+  }
+  .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; outline: none; }
+  .stage canvas:active { cursor: grabbing; }
+  .seg {
+    position: absolute; left: 14px; bottom: 14px; display: inline-flex;
+    border: 1px solid var(--navy); background: var(--paper);
+  }
+  .seg button {
+    border: 0; background: transparent; color: var(--navy); font: inherit;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 9px 16px; cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--navy); }
+  .seg button[aria-pressed="true"] { background: var(--pink); color: #fff; }
+  .seg button:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+  .hint {
+    position: absolute; right: 14px; bottom: 18px; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transform: translate(-50%, -140%);
+    background: var(--navy); color: #fff; padding: 7px 11px; font-size: 13px; line-height: 1.3;
+    white-space: nowrap; transition: opacity 120ms linear;
+  }
+  .tip b { display: block; color: var(--pink); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+  .tip.on { opacity: 1; }
+  .fail { position: absolute; inset: 0; margin: 0; padding: 24px; display: flex; align-items: center; color: var(--muted); }
+
+  /* Cut table */
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+    border-bottom: 2px solid var(--navy); font-weight: 700;
+  }
+  td.key, th.key { width: 42px; padding-left: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
+  tbody td { font-weight: 400; }
+  tbody td.name { font-weight: 700; }
+  .swatch {
+    display: block; width: 26px; height: 26px; color: #fff;
+    font-size: 12px; font-weight: 700; line-height: 26px; text-align: center;
+  }
+  .note { margin: 12px 0 0; font-size: 13px; color: var(--muted); max-width: 62ch; }
+
+  /* Cutting layout */
+  .board { position: relative; height: 62px; background: var(--wash); border: 1px solid var(--line); }
+  .board.len { height: 34px; }
+  .board.len .pc { font-size: 11px; }
+  .pc {
+    position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff;
+  }
+  .pc.spare {
+    color: var(--muted); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    background: repeating-linear-gradient(45deg, transparent 0 7px, var(--line) 7px 8px);
+  }
+
+  .guide { width: 100%; height: auto; display: block; margin-top: 4px; }
+  .lede { margin: 0 0 16px; font-size: 14px; color: var(--muted); max-width: 62ch; }
+
+  .asm { display: grid; gap: 14px; margin-top: 4px; }
+  .step { border: 1px solid var(--line); border-left: 4px solid var(--pink); padding: 14px 16px; }
+  .step h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
+  .step h3 span { color: var(--pink); margin-right: 8px; }
+  .tag {
+    display: inline-block; background: var(--navy); color: #fff; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 9px; margin-bottom: 8px;
+  }
+  .step p { margin: 0; font-size: 14px; }
+  .step p.cap { margin-top: 6px; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="rule"></div>
+  <h1>Pallet coaster</h1>
+  <p class="sub">100 &times; 100 &times; 22 mm. Eleven pieces in three layers: five slats on top, three bearers through the middle, three boards underneath. Decks are 5 mm stock, bearers are 12 mm stock.</p>
+
+  <div class="stage" id="stage">
+    <canvas id="c" tabindex="0" aria-label="3D model of the pallet coaster. Drag to turn, pinch or scroll to zoom, hover or tap a part to see its size."></canvas>
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" data-mode="assembled" aria-pressed="true">Assembled</button>
+      <button type="button" data-mode="exploded" aria-pressed="false">Exploded</button>
+    </div>
+    <div class="hint">Drag to turn &middot; tap a part for its size</div>
+    <div class="tip" id="tip" aria-live="polite"></div>
+  </div>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Cut list</h2>
+    <table>
+      <thead>
+        <tr>
+          <th class="key" scope="col"></th>
+          <th scope="col">Part</th>
+          <th scope="col">Size</th>
+          <th class="num" scope="col">Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="key"><span class="swatch" style="background:#1b1f45">A</span></td><td class="name">Top slat</td><td>100 &times; 15 &times; 5 mm</td><td class="num">5</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#ea008a">B</span></td><td class="name">Bearer</td><td>100 &times; 15 &times; 12 mm</td><td class="num">3</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#4e5590">C</span></td><td class="name">Bottom board</td><td>100 &times; 15 &times; 5 mm</td><td class="num">3</td></tr>
+      </tbody>
+    </table>
+    <p class="note">All eleven pieces are 100 mm long and 15 mm wide. The eight deck pieces are 5 mm thick, the three bearers are 12 mm thick, giving an overall height of 22 mm.</p>
+  </section>
+
+
+  <section>
+    <div class="rule"></div>
+    <h2>Setting out each layer</h2>
+    <p class="lede">Three layers, each 100 &times; 100 mm in plan. Positions are measured from the left or top edge.</p>
+    <svg class="guide" viewBox="0 0 780 336" role="img"
+         aria-label="Three plan views. Top deck: five slats 15 millimetres wide with four gaps of 6.25. Bearers: three strips 12 millimetres wide with gaps of 32. Bottom deck: three boards 15 millimetres wide with gaps of 27.5.">
+      <defs>
+        <marker id="pm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#1b1f45"/>
+        </marker>
+      </defs>
+      <g font-family="Helvetica, Arial, sans-serif" fill="#1b1f45">
+
+        <!-- ================= TOP DECK ================= -->
+        <text x="60" y="28" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">TOP DECK</text>
+        <text x="146" y="28" font-size="12" fill="#6b7091">5 &times; A</text>
+        <line x1="60" y1="58" x2="250" y2="58" stroke="#1b1f45" stroke-width="1" marker-start="url(#pm)" marker-end="url(#pm)"/>
+        <rect x="139" y="48" width="32" height="18" fill="#fff"/>
+        <text x="155" y="62" font-size="12" text-anchor="middle">100</text>
+        <rect x="60" y="76" width="190" height="190" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
+        <rect x="60" y="76" width="28.5" height="190" fill="#1b1f45"/>
+        <rect x="100.4" y="76" width="28.5" height="190" fill="#1b1f45"/>
+        <rect x="140.8" y="76" width="28.5" height="190" fill="#1b1f45"/>
+        <rect x="181.1" y="76" width="28.5" height="190" fill="#1b1f45"/>
+        <rect x="221.5" y="76" width="28.5" height="190" fill="#1b1f45"/>
+        <line x1="60" y1="266" x2="60" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
+        <line x1="88.5" y1="266" x2="88.5" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
+        <line x1="60" y1="284" x2="88.5" y2="284" stroke="#1b1f45" stroke-width="1"/>
+        <line x1="32" y1="284" x2="60" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
+        <line x1="116.5" y1="284" x2="88.5" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
+        <text x="122" y="288" font-size="12">15</text>
+        <text x="60" y="314" font-size="12" fill="#6b7091">Four gaps of 6.25</text>
+
+        <!-- ================= BEARERS ================= -->
+        <text x="300" y="28" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">BEARERS</text>
+        <text x="378" y="28" font-size="12" fill="#6b7091">3 &times; B</text>
+        <line x1="300" y1="58" x2="490" y2="58" stroke="#1b1f45" stroke-width="1" marker-start="url(#pm)" marker-end="url(#pm)"/>
+        <rect x="379" y="48" width="32" height="18" fill="#fff"/>
+        <text x="395" y="62" font-size="12" text-anchor="middle">100</text>
+        <rect x="300" y="76" width="190" height="190" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
+        <rect x="300" y="76" width="190" height="28.5" fill="#ea008a"/>
+        <rect x="300" y="156.75" width="190" height="28.5" fill="#ea008a"/>
+        <rect x="300" y="237.5" width="190" height="28.5" fill="#ea008a"/>
+        <line x1="300" y1="76" x2="276" y2="76" stroke="#d7d9e4" stroke-width="0.8"/>
+        <line x1="300" y1="104.5" x2="276" y2="104.5" stroke="#d7d9e4" stroke-width="0.8"/>
+        <line x1="284" y1="76" x2="284" y2="104.5" stroke="#1b1f45" stroke-width="1"/>
+        <line x1="284" y1="52" x2="284" y2="76" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
+        <line x1="284" y1="132.5" x2="284" y2="104.5" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
+        <text x="278" y="148" font-size="12" text-anchor="middle">15</text>
+        <text x="300" y="314" font-size="12" fill="#6b7091">Two gaps of 27.5</text>
+
+        <!-- ================= BOTTOM DECK ================= -->
+        <text x="540" y="28" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">BOTTOM DECK</text>
+        <text x="648" y="28" font-size="12" fill="#6b7091">3 &times; C</text>
+        <line x1="540" y1="58" x2="730" y2="58" stroke="#1b1f45" stroke-width="1" marker-start="url(#pm)" marker-end="url(#pm)"/>
+        <rect x="619" y="48" width="32" height="18" fill="#fff"/>
+        <text x="635" y="62" font-size="12" text-anchor="middle">100</text>
+        <rect x="540" y="76" width="190" height="190" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
+        <rect x="540" y="76" width="28.5" height="190" fill="#4e5590"/>
+        <rect x="620.75" y="76" width="28.5" height="190" fill="#4e5590"/>
+        <rect x="701.5" y="76" width="28.5" height="190" fill="#4e5590"/>
+        <line x1="540" y1="266" x2="540" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
+        <line x1="568.5" y1="266" x2="568.5" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
+        <line x1="540" y1="284" x2="568.5" y2="284" stroke="#1b1f45" stroke-width="1"/>
+        <line x1="512" y1="284" x2="540" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
+        <line x1="596.5" y1="284" x2="568.5" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
+        <text x="602" y="288" font-size="12">15</text>
+        <text x="540" y="314" font-size="12" fill="#6b7091">Two gaps of 27.5</text>
+      </g>
+    </svg>
+  </section>
+
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('c');
+  var tip = document.getElementById('tip');
+  try {
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    run(renderer);
+  } catch (err) {
+    stage.insertAdjacentHTML('beforeend', '<p class="fail">The 3D view needs WebGL, which is not available in this browser. The cut list below still works.</p>');
+  }
+
+  function run(renderer) {
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(34, 1, 5, 3000);
+    var dirty = true;
+
+    function makeWood() {
+      var c = document.createElement('canvas');
+      c.width = 256; c.height = 512;
+      var g = c.getContext('2d');
+      g.fillStyle = '#e2c48f';
+      g.fillRect(0, 0, 256, 512);
+      var i, k;
+      for (i = 0; i < 150; i++) {
+        var x = Math.random() * 256;
+        var w = 0.5 + Math.random() * 2.2;
+        var amp = 1 + Math.random() * 3;
+        var ph = Math.random() * 6.28;
+        var cyc = 1 + Math.floor(Math.random() * 2);
+        g.strokeStyle = 'rgba(' + (145 + Math.random() * 35 | 0) + ',' + (100 + Math.random() * 30 | 0) + ',55,' + (0.07 + Math.random() * 0.2).toFixed(3) + ')';
+        g.lineWidth = w;
+        g.beginPath();
+        for (k = 0; k <= 512; k += 16) {
+          var xx = x + Math.sin(k / 512 * 6.2832 * cyc + ph) * amp;
+          if (k === 0) g.moveTo(xx, k); else g.lineTo(xx, k);
+        }
+        g.stroke();
+      }
+      var t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.encoding = THREE.sRGBEncoding;
+      t.anisotropy = 4;
+      return t;
+    }
+    var wood = makeWood();
+
+    function mapUV(geom, grain) {
+      var pos = geom.attributes.position, nor = geom.attributes.normal;
+      var uv = new Float32Array(pos.count * 2);
+      var S = 1 / 70;
+      var gi = { x: 0, y: 1, z: 2 }[grain];
+      for (var i = 0; i < pos.count; i++) {
+        var p = [pos.getX(i), pos.getY(i), pos.getZ(i)];
+        var n = [Math.abs(nor.getX(i)), Math.abs(nor.getY(i)), Math.abs(nor.getZ(i))];
+        var d = 0;
+        if (n[1] > n[d]) d = 1;
+        if (n[2] > n[d]) d = 2;
+        var axes = [0, 1, 2].filter(function (a) { return a !== d; });
+        var u, v;
+        if (axes.indexOf(gi) !== -1) {
+          v = p[gi];
+          u = p[axes[0] === gi ? axes[1] : axes[0]];
+        } else {
+          u = p[axes[0]]; v = p[axes[1]];
+        }
+        uv[2 * i] = u * S; uv[2 * i + 1] = v * S;
+      }
+      geom.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    }
+
+    function woodMesh(geo, grain, tint) {
+      mapUV(geo, grain);
+      var m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: wood, color: tint, roughness: 0.9, metalness: 0 }));
+      m.castShadow = true; m.receiveShadow = true;
+      return m;
+    }
+
+    function boxGeo(x0, x1, y0, y1, z0, z1) {
+      var g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
+      g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+      return g;
+    }
+
+    var movers = [];
+    var pickable = [];
+    var root = new THREE.Group();
+    scene.add(root);
+
+    function part(off, label, size) {
+      var g = new THREE.Group();
+      g.userData = {
+        base: new THREE.Vector3(0, 0, 0),
+        off: new THREE.Vector3(off[0], off[1], off[2]),
+        label: label, size: size
+      };
+      root.add(g); movers.push(g);
+      return g;
+    }
+    function pick(group, mesh) {
+      mesh.userData.owner = group;
+      pickable.push(mesh);
+      group.add(mesh);
+    }
+
+    var TINTS = [0xf1dcb6, 0xf6e6c8, 0xf4e1bd, 0xecd5ab, 0xe9d1a4, 0xf3dfba];
+
+    // Top slats (A): 100 long, 15 wide, 5 thick, sitting at y 17 to 22
+    [0, 21.25, 42.5, 63.75, 85].forEach(function (x, i) {
+      var c = x + 7.5;
+      var g = part([(c - 50) * 0.62, 78, 0], 'A  Top slat', '100 \u00d7 15 \u00d7 5 mm');
+      pick(g, woodMesh(boxGeo(x, x + 15, 17, 22, 0, 100), 'z', TINTS[i % 6]));
+    });
+
+    // Bearers (B): 100 long, 15 wide, 12 thick, y 5 to 17
+    [0, 42.5, 85].forEach(function (z, i) {
+      var c = z + 7.5;
+      var g = part([0, 34, (c - 50) * 0.55], 'B  Bearer', '100 \u00d7 15 \u00d7 12 mm');
+      pick(g, woodMesh(boxGeo(0, 100, 5, 17, z, z + 15), 'x', TINTS[(i + 2) % 6]));
+    });
+
+    // Bottom boards (C): 100 long, 15 wide, 5 thick, y 0 to 5
+    [0, 42.5, 85].forEach(function (x, i) {
+      var c = x + 7.5;
+      var g = part([(c - 50) * 1.05, 0, 0], 'C  Bottom board', '100 \u00d7 15 \u00d7 5 mm');
+      pick(g, woodMesh(boxGeo(x, x + 15, 0, 5, 0, 100), 'z', TINTS[(i + 4) % 6]));
+    });
+
+    var ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.ShadowMaterial({ opacity: 0.16 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.set(50, -0.6, 50);
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    var target = new THREE.Vector3(50, 20, 50);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a7a62, 0.72));
+    var sun = new THREE.DirectionalLight(0xffffff, 0.95);
+    sun.position.set(210, 380, 300);
+    sun.target.position.copy(target);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    var sc = sun.shadow.camera;
+    sc.left = -220; sc.right = 220; sc.top = 220; sc.bottom = -220; sc.near = 40; sc.far = 1100;
+    sun.shadow.bias = -0.0006;
+    sun.shadow.normalBias = 0.4;
+    scene.add(sun); scene.add(sun.target);
+    var fill = new THREE.DirectionalLight(0xfff4e0, 0.35);
+    fill.position.set(-240, 160, -180);
+    scene.add(fill);
+
+    var theta = 0.72, phi = 1.05, radius = 300;
+    var expl = 0, explTarget = 0;
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function updateCam() {
+      var r = radius * (1 + 0.3 * expl);
+      camera.position.set(
+        target.x + r * Math.sin(phi) * Math.sin(theta),
+        target.y + r * Math.cos(phi),
+        target.z + r * Math.sin(phi) * Math.cos(theta)
+      );
+      camera.lookAt(target);
+      dirty = true;
+    }
+    function applyExpl() {
+      movers.forEach(function (g) {
+        g.position.copy(g.userData.base).addScaledVector(g.userData.off, expl);
+      });
+      updateCam();
+    }
+
+    var ray = new THREE.Raycaster();
+    var ndc = new THREE.Vector2();
+    var active = null;
+    function setActive(group) {
+      if (active === group) return;
+      pickable.forEach(function (m) {
+        var on = group && m.userData.owner === group;
+        m.material.emissive.setHex(on ? 0xea008a : 0x000000);
+        m.material.emissiveIntensity = on ? 0.38 : 0;
+      });
+      active = group;
+      if (group) {
+        tip.innerHTML = '<b>' + group.userData.label + '</b>' + group.userData.size;
+        tip.classList.add('on');
+      } else {
+        tip.classList.remove('on');
+      }
+      dirty = true;
+    }
+    function hover(clientX, clientY) {
+      var r = canvas.getBoundingClientRect();
+      ndc.x = ((clientX - r.left) / r.width) * 2 - 1;
+      ndc.y = -((clientY - r.top) / r.height) * 2 + 1;
+      ray.setFromCamera(ndc, camera);
+      var hits = ray.intersectObjects(pickable, false);
+      if (hits.length) {
+        setActive(hits[0].object.userData.owner);
+        tip.style.left = (clientX - r.left) + 'px';
+        tip.style.top = (clientY - r.top) + 'px';
+      } else {
+        setActive(null);
+      }
+    }
+
+    var ptrs = new Map(), lastDist = 0, moved = false;
+    function pinchDist() {
+      var a = Array.from(ptrs.values());
+      return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1;
+    }
+    canvas.addEventListener('pointerdown', function (e) {
+      canvas.setPointerCapture(e.pointerId);
+      ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      moved = false;
+      if (ptrs.size === 2) lastDist = pinchDist();
+      if (e.pointerType !== 'mouse') hover(e.clientX, e.clientY);
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      var p = ptrs.get(e.pointerId);
+      if (!p) { if (e.pointerType === 'mouse') hover(e.clientX, e.clientY); return; }
+      var dx = e.clientX - p.x, dy = e.clientY - p.y;
+      p.x = e.clientX; p.y = e.clientY;
+      if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+      if (moved) setActive(null);
+      if (ptrs.size === 1) {
+        theta -= dx * 0.008;
+        phi = clamp(phi - dy * 0.008, 0.2, 2.9);
+        updateCam();
+      } else if (ptrs.size === 2) {
+        var d = pinchDist();
+        radius = clamp(radius * lastDist / d, 150, 640);
+        lastDist = d;
+        updateCam();
+      }
+    });
+    function endPtr(e) { ptrs.delete(e.pointerId); }
+    canvas.addEventListener('pointerup', endPtr);
+    canvas.addEventListener('pointercancel', endPtr);
+    canvas.addEventListener('pointerleave', function () { setActive(null); });
+    canvas.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      radius = clamp(radius * (1 + e.deltaY * 0.001), 150, 640);
+      updateCam();
+    }, { passive: false });
+    canvas.addEventListener('keydown', function (e) {
+      var used = true;
+      if (e.key === 'ArrowLeft') theta -= 0.12;
+      else if (e.key === 'ArrowRight') theta += 0.12;
+      else if (e.key === 'ArrowUp') phi = clamp(phi - 0.1, 0.2, 2.9);
+      else if (e.key === 'ArrowDown') phi = clamp(phi + 0.1, 0.2, 2.9);
+      else used = false;
+      if (used) { e.preventDefault(); updateCam(); }
+    });
+
+    var btns = document.querySelectorAll('.seg button');
+    Array.prototype.forEach.call(btns, function (b) {
+      b.addEventListener('click', function () {
+        explTarget = b.getAttribute('data-mode') === 'exploded' ? 1 : 0;
+        setActive(null);
+        if (reduced) { expl = explTarget; applyExpl(); }
+        Array.prototype.forEach.call(btns, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      });
+    });
+
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      dirty = true;
+    }
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+    window.addEventListener('resize', resize);
+
+    function frame() {
+      if (expl !== explTarget) {
+        var d = explTarget - expl;
+        expl = Math.abs(d) < 0.002 ? explTarget : expl + d * 0.14;
+        applyExpl();
+      }
+      if (dirty) { renderer.render(scene, camera); dirty = false; }
+      requestAnimationFrame(frame);
+    }
+    resize();
+    applyExpl();
+    frame();
+  }
+})();
+</script>
+</body>
+</html>
