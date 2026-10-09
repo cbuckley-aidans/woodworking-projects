@@ -31,9 +31,8 @@
   .rule { height: 3px; background: var(--navy); margin: 0 0 14px; }
   h1 {
     font-size: clamp(30px, 6vw, 46px); line-height: 1.02; font-weight: 700;
-    letter-spacing: -0.025em; margin: 0 0 12px; max-width: 16ch;
+    letter-spacing: -0.025em; margin: 0 0 32px; max-width: 16ch;
   }
-  .sub { margin: 0 0 32px; font-size: 14px; color: var(--muted); max-width: 62ch; }
   h2 {
     font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
     margin: 0 0 10px; color: var(--navy);
@@ -75,62 +74,83 @@
 
   /* Cut table */
   table { width: 100%; border-collapse: collapse; }
-  th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); }
+  th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
   thead th {
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
     border-bottom: 2px solid var(--navy); font-weight: 700;
   }
   td.key, th.key { width: 42px; padding-left: 0; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
-  tbody td { font-weight: 400; }
-  tbody td.name { font-weight: 700; }
+  tbody td.name, tfoot td.name { font-weight: 700; }
+  tfoot tr:first-child td { border-top: 2px solid var(--navy); }
   .swatch {
     display: block; width: 26px; height: 26px; color: #fff;
     font-size: 12px; font-weight: 700; line-height: 26px; text-align: center;
   }
-  .note { margin: 12px 0 0; font-size: 13px; color: var(--muted); max-width: 62ch; }
-
-  /* Cutting layout */
-  .board { position: relative; height: 62px; background: var(--wash); border: 1px solid var(--line); }
-  .board.len { height: 34px; }
-  .board.len .pc { font-size: 11px; }
-  .pc {
-    position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px; color: #fff;
-  }
-  .pc.spare {
-    color: var(--muted); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
-    background: repeating-linear-gradient(45deg, transparent 0 7px, var(--line) 7px 8px);
-  }
 
   .guide { width: 100%; height: auto; display: block; margin-top: 4px; }
+  .guide.narrow { max-width: 460px; }
   .lede { margin: 0 0 16px; font-size: 14px; color: var(--muted); max-width: 62ch; }
 
-  .asm { display: grid; gap: 14px; margin-top: 4px; }
-  .step { border: 1px solid var(--line); border-left: 4px solid var(--pink); padding: 14px 16px; }
-  .step h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
-  .step h3 span { color: var(--pink); margin-right: 8px; }
-  .tag {
-    display: inline-block; background: var(--navy); color: #fff; font-size: 10px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 9px; margin-bottom: 8px;
+  /* Cutting sequence player */
+  .stage.seq { height: clamp(320px, 62vw, 480px); }
+  .ov {
+    position: absolute; left: 14px; top: 14px; max-width: calc(100% - 150px);
+    background: rgba(255, 255, 255, 0.94); border-left: 4px solid var(--pink); padding: 8px 12px 9px;
   }
-  .step p { margin: 0; font-size: 14px; }
-  .step p.cap { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .ov b { display: block; color: var(--pink); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; }
+  .ov span { display: block; font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .count {
+    position: absolute; right: 14px; top: 14px; text-align: right;
+    font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .count strong { display: block; font-size: 22px; line-height: 1.1; color: var(--navy); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .player { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+  .ctl {
+    border: 1px solid var(--navy); background: var(--navy); color: #fff; font: inherit;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 9px 0; width: 96px; cursor: pointer;
+  }
+  .ctl:hover { background: var(--pink); border-color: var(--pink); }
+  .ctl:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+  .player input[type="range"] { flex: 1; min-width: 0; accent-color: var(--pink); }
+  .time { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chapters {
+    list-style: none; margin: 18px 0 0; padding: 0; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); column-gap: 24px;
+  }
+  .chapters button {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 0;
+    border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--navy);
+    font: inherit; font-size: 14px; text-align: left; cursor: pointer;
+  }
+  .chapters .n {
+    flex: none; width: 24px; height: 24px; line-height: 22px; text-align: center;
+    border: 1px solid var(--navy); font-size: 12px; font-weight: 700;
+  }
+  .chapters button:hover .n { border-color: var(--pink); color: var(--pink); }
+  .chapters button[aria-current="step"] { font-weight: 700; }
+  .chapters button[aria-current="step"] .n { background: var(--pink); border-color: var(--pink); color: #fff; }
+  .chapters button:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+  @media (max-width: 520px) {
+    .hint { display: none; }
+    .ov span { font-size: 13px; }
+  }
 </style>
 </head>
 <body>
 <main>
   <div class="rule"></div>
   <h1>Pallet coaster</h1>
-  <p class="sub">100 &times; 100 &times; 22 mm. Eleven pieces in three layers: five slats on top, three bearers through the middle, three boards underneath. Decks are 5 mm stock, bearers are 12 mm stock.</p>
 
   <div class="stage" id="stage">
-    <canvas id="c" tabindex="0" aria-label="3D model of the pallet coaster. Drag to turn, pinch or scroll to zoom, hover or tap a part to see its size."></canvas>
+    <canvas id="c" tabindex="0" aria-label="3D model of the pallet coaster. Drag to turn, pinch or scroll to zoom, hover or tap a slat to see its size."></canvas>
     <div class="seg" role="group" aria-label="View">
       <button type="button" data-mode="assembled" aria-pressed="true">Assembled</button>
       <button type="button" data-mode="exploded" aria-pressed="false">Exploded</button>
     </div>
-    <div class="hint">Drag to turn &middot; tap a part for its size</div>
+    <div class="hint">Drag to turn &middot; tap a slat for its size</div>
     <div class="tip" id="tip" aria-live="polite"></div>
   </div>
 
@@ -147,384 +167,925 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td class="key"><span class="swatch" style="background:#1b1f45">A</span></td><td class="name">Top slat</td><td>100 &times; 15 &times; 5 mm</td><td class="num">5</td></tr>
-        <tr><td class="key"><span class="swatch" style="background:#ea008a">B</span></td><td class="name">Bearer</td><td>100 &times; 15 &times; 12 mm</td><td class="num">3</td></tr>
-        <tr><td class="key"><span class="swatch" style="background:#4e5590">C</span></td><td class="name">Bottom board</td><td>100 &times; 15 &times; 5 mm</td><td class="num">3</td></tr>
+        <tr><td class="key"><span class="swatch" style="background:#1b1f45">A</span></td><td class="name">Slat</td><td>70 &times; 15 &times; 12 mm</td><td class="num">9</td></tr>
       </tbody>
+      <tfoot>
+        <tr><td class="key"></td><td class="name">Total allocated timber</td><td>140 &times; 12 &times; 100 mm pine</td><td class="num"></td></tr>
+      </tfoot>
     </table>
-    <p class="note">All eleven pieces are 100 mm long and 15 mm wide. The eight deck pieces are 5 mm thick, the three bearers are 12 mm thick, giving an overall height of 22 mm.</p>
   </section>
-
 
   <section>
     <div class="rule"></div>
-    <h2>Setting out each layer</h2>
-    <p class="lede">Three layers, each 100 &times; 100 mm in plan. Positions are measured from the left or top edge.</p>
-    <svg class="guide" viewBox="0 0 780 336" role="img"
-         aria-label="Three plan views. Top deck: five slats 15 millimetres wide with four gaps of 6.25. Bearers: three strips 12 millimetres wide with gaps of 32. Bottom deck: three boards 15 millimetres wide with gaps of 27.5.">
+    <h2>Cutting layout</h2>
+    <p class="lede">Each saw cut removes about 1.5 mm, so always measure the next 15 mm from the freshly cut end rather than marking all five strips at once.</p>
+    <svg class="guide narrow" viewBox="0 0 440 400" role="img" aria-label="Board layout for a 100 by 140 millimetre piece of 12 millimetre pine. Five 15 millimetre strips are cut from the end, each split at 70 millimetres into two slats. Nine slats are used, one is spare, and about 25 millimetres is left over.">
       <defs>
-        <marker id="pm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M0 0 L10 5 L0 10 z" fill="#1b1f45"/>
-        </marker>
+        <marker id="lA" viewBox="0 0 10 4" refX="10" refY="2" markerWidth="9" markerHeight="3.6" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0 L10 2 L0 4 z" fill="#1b1f45"/></marker>
+        <pattern id="lHatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="7" stroke="#d7d9e4" stroke-width="2.5"/></pattern>
       </defs>
       <g font-family="Helvetica, Arial, sans-serif" fill="#1b1f45">
-
-        <!-- ================= TOP DECK ================= -->
-        <text x="60" y="28" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">TOP DECK</text>
-        <text x="146" y="28" font-size="12" fill="#6b7091">5 &times; A</text>
-        <line x1="60" y1="58" x2="250" y2="58" stroke="#1b1f45" stroke-width="1" marker-start="url(#pm)" marker-end="url(#pm)"/>
-        <rect x="139" y="48" width="32" height="18" fill="#fff"/>
-        <text x="155" y="62" font-size="12" text-anchor="middle">100</text>
-        <rect x="60" y="76" width="190" height="190" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
-        <rect x="60" y="76" width="28.5" height="190" fill="#1b1f45"/>
-        <rect x="100.4" y="76" width="28.5" height="190" fill="#1b1f45"/>
-        <rect x="140.8" y="76" width="28.5" height="190" fill="#1b1f45"/>
-        <rect x="181.1" y="76" width="28.5" height="190" fill="#1b1f45"/>
-        <rect x="221.5" y="76" width="28.5" height="190" fill="#1b1f45"/>
-        <line x1="60" y1="266" x2="60" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
-        <line x1="88.5" y1="266" x2="88.5" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
-        <line x1="60" y1="284" x2="88.5" y2="284" stroke="#1b1f45" stroke-width="1"/>
-        <line x1="32" y1="284" x2="60" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
-        <line x1="116.5" y1="284" x2="88.5" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
-        <text x="122" y="288" font-size="12">15</text>
-        <text x="60" y="314" font-size="12" fill="#6b7091">Four gaps of 6.25</text>
-
-        <!-- ================= BEARERS ================= -->
-        <text x="300" y="28" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">BEARERS</text>
-        <text x="378" y="28" font-size="12" fill="#6b7091">3 &times; B</text>
-        <line x1="300" y1="58" x2="490" y2="58" stroke="#1b1f45" stroke-width="1" marker-start="url(#pm)" marker-end="url(#pm)"/>
-        <rect x="379" y="48" width="32" height="18" fill="#fff"/>
-        <text x="395" y="62" font-size="12" text-anchor="middle">100</text>
-        <rect x="300" y="76" width="190" height="190" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
-        <rect x="300" y="76" width="190" height="28.5" fill="#ea008a"/>
-        <rect x="300" y="156.75" width="190" height="28.5" fill="#ea008a"/>
-        <rect x="300" y="237.5" width="190" height="28.5" fill="#ea008a"/>
-        <line x1="300" y1="76" x2="276" y2="76" stroke="#d7d9e4" stroke-width="0.8"/>
-        <line x1="300" y1="104.5" x2="276" y2="104.5" stroke="#d7d9e4" stroke-width="0.8"/>
-        <line x1="284" y1="76" x2="284" y2="104.5" stroke="#1b1f45" stroke-width="1"/>
-        <line x1="284" y1="52" x2="284" y2="76" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
-        <line x1="284" y1="132.5" x2="284" y2="104.5" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
-        <text x="278" y="148" font-size="12" text-anchor="middle">15</text>
-        <text x="300" y="314" font-size="12" fill="#6b7091">Two gaps of 27.5</text>
-
-        <!-- ================= BOTTOM DECK ================= -->
-        <text x="540" y="28" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">BOTTOM DECK</text>
-        <text x="648" y="28" font-size="12" fill="#6b7091">3 &times; C</text>
-        <line x1="540" y1="58" x2="730" y2="58" stroke="#1b1f45" stroke-width="1" marker-start="url(#pm)" marker-end="url(#pm)"/>
-        <rect x="619" y="48" width="32" height="18" fill="#fff"/>
-        <text x="635" y="62" font-size="12" text-anchor="middle">100</text>
-        <rect x="540" y="76" width="190" height="190" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
-        <rect x="540" y="76" width="28.5" height="190" fill="#4e5590"/>
-        <rect x="620.75" y="76" width="28.5" height="190" fill="#4e5590"/>
-        <rect x="701.5" y="76" width="28.5" height="190" fill="#4e5590"/>
-        <line x1="540" y1="266" x2="540" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
-        <line x1="568.5" y1="266" x2="568.5" y2="292" stroke="#d7d9e4" stroke-width="0.8"/>
-        <line x1="540" y1="284" x2="568.5" y2="284" stroke="#1b1f45" stroke-width="1"/>
-        <line x1="512" y1="284" x2="540" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
-        <line x1="596.5" y1="284" x2="568.5" y2="284" stroke="#1b1f45" stroke-width="1" marker-end="url(#pm)"/>
-        <text x="602" y="288" font-size="12">15</text>
-        <text x="540" y="314" font-size="12" fill="#6b7091">Two gaps of 27.5</text>
+        <rect x="120" y="80" width="220" height="308" fill="#f4f5f9" stroke="#d7d9e4" stroke-width="1"/>
+        <!-- strips -->
+        <g fill="#1b1f45">
+          <rect x="120.75" y="80.75" width="31.5" height="152.5"/><rect x="120.75" y="234.75" width="31.5" height="152.5"/>
+          <rect x="153.75" y="80.75" width="31.5" height="152.5"/><rect x="153.75" y="234.75" width="31.5" height="152.5"/>
+          <rect x="186.75" y="80.75" width="31.5" height="152.5"/><rect x="186.75" y="234.75" width="31.5" height="152.5"/>
+          <rect x="219.75" y="80.75" width="31.5" height="152.5"/><rect x="219.75" y="234.75" width="31.5" height="152.5"/>
+          <rect x="252.75" y="80.75" width="31.5" height="152.5"/>
+        </g>
+        <rect x="252.75" y="234.75" width="31.5" height="152.5" fill="url(#lHatch)"/>
+        <rect x="285.75" y="80.75" width="53.5" height="306.5" fill="url(#lHatch)"/>
+        <g fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">
+          <text x="136.5" y="161">A</text><text x="136.5" y="315">A</text>
+          <text x="169.5" y="161">A</text><text x="169.5" y="315">A</text>
+          <text x="202.5" y="161">A</text><text x="202.5" y="315">A</text>
+          <text x="235.5" y="161">A</text><text x="235.5" y="315">A</text>
+          <text x="268.5" y="161">A</text>
+        </g>
+        <g fill="#6b7091" font-size="10" letter-spacing="1.2" text-anchor="middle">
+          <text transform="rotate(-90 272 311)" x="272" y="311">SPARE</text>
+          <text transform="rotate(-90 316 234)" x="316" y="234">OFFCUT</text>
+        </g>
+        <!-- extension lines -->
+        <g stroke="#1b1f45" stroke-width="0.5">
+          <line x1="120" y1="76" x2="120" y2="22"/><line x1="153" y1="76" x2="153" y2="46"/><line x1="186" y1="76" x2="186" y2="46"/>
+          <line x1="219" y1="76" x2="219" y2="46"/><line x1="252" y1="76" x2="252" y2="46"/><line x1="285" y1="76" x2="285" y2="46"/>
+          <line x1="340" y1="76" x2="340" y2="22"/>
+          <line x1="116" y1="80" x2="54" y2="80"/><line x1="116" y1="234" x2="86" y2="234"/><line x1="116" y1="388" x2="54" y2="388"/>
+        </g>
+        <!-- 15 chain -->
+        <g stroke="#1b1f45" stroke-width="0.6">
+          <line x1="120" y1="54" x2="153" y2="54" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="153" y1="54" x2="186" y2="54" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="186" y1="54" x2="219" y2="54" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="219" y1="54" x2="252" y2="54" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="252" y1="54" x2="285" y2="54" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="285" y1="54" x2="340" y2="54" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="120" y1="30" x2="340" y2="30" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="94" y1="80" x2="94" y2="234" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="94" y1="234" x2="94" y2="388" marker-start="url(#lA)" marker-end="url(#lA)"/>
+          <line x1="62" y1="80" x2="62" y2="388" marker-start="url(#lA)" marker-end="url(#lA)"/>
+        </g>
+        <g font-size="13" text-anchor="middle">
+          <text x="136.5" y="48">15</text><text x="169.5" y="48">15</text><text x="202.5" y="48">15</text>
+          <text x="235.5" y="48">15</text><text x="268.5" y="48">15</text><text x="312.5" y="48">25</text>
+          <text x="230" y="24">100</text>
+          <text transform="rotate(-90 88 157)" x="88" y="157">70</text>
+          <text transform="rotate(-90 88 311)" x="88" y="311">70</text>
+          <text transform="rotate(-90 56 234)" x="56" y="234">140</text>
+        </g>
       </g>
     </svg>
   </section>
 
+  <section>
+    <div class="rule"></div>
+    <h2>Cutting the slats</h2>
+    <p class="lede">The strips are cut across the board, so the grain runs across each slat's 15 mm width. Handle the strips gently, as they can snap along the grain.</p>
+    <svg class="guide" viewBox="0 0 560 720" role="img" aria-label="Three step guide. Step one, square a line 15 millimetres from the end of the 140 millimetre wide board and saw it off to give a 140 by 15 millimetre strip. Step two, mark the centre of the strip at 70 millimetres. Step three, cut on the mark to give two slats, each 70 by 15 millimetres. Repeat five times for ten slats.">
+      <defs>
+        <marker id="gA" viewBox="0 0 10 4" refX="10" refY="2" markerWidth="9" markerHeight="3.6" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0 L10 2 L0 4 z" fill="#1b1f45"/></marker>
+        <marker id="gP" viewBox="0 0 10 4" refX="10" refY="2" markerWidth="9" markerHeight="3.6" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0 L10 2 L0 4 z" fill="#ea008a"/></marker>
+      </defs>
+      <g font-family="Helvetica, Arial, sans-serif" fill="#1b1f45" stroke-linecap="square">
 
+        <!-- STEP 1 -->
+        <text x="80" y="26" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">STEP 1</text>
+        <text x="140" y="26" font-size="13">Square a line 15 mm from the end, then saw it off</text>
+        <rect x="80" y="76" width="200" height="280" fill="#f4f5f9" stroke="#1b1f45" stroke-width="1.6"/>
+        <line x1="110" y1="76" x2="110" y2="356" stroke="#ea008a" stroke-width="2" stroke-dasharray="9 5"/>
+        <g stroke="#1b1f45" stroke-width="0.5">
+          <line x1="80" y1="72" x2="80" y2="50"/><line x1="110" y1="72" x2="110" y2="50"/>
+          <line x1="76" y1="76" x2="40" y2="76"/><line x1="76" y1="356" x2="40" y2="356"/>
+        </g>
+        <line x1="80" y1="58" x2="110" y2="58" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text x="95" y="52" font-size="13" text-anchor="middle">15</text>
+        <line x1="48" y1="76" x2="48" y2="356" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text transform="rotate(-90 42 216)" x="42" y="216" font-size="13" text-anchor="middle">140</text>
+        <path d="M 112 216 L 300 176 L 318 176" fill="none" stroke="#ea008a" stroke-width="0.8" marker-start="url(#gP)"/>
+        <text x="324" y="180" font-size="12" fill="#ea008a">saw on the line, square to the face</text>
+
+        <!-- STEP 2 -->
+        <text x="80" y="410" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">STEP 2</text>
+        <text x="140" y="410" font-size="13">Mark the centre of the 140 &times; 15 strip</text>
+        <rect x="80" y="470" width="280" height="30" fill="#f4f5f9" stroke="#1b1f45" stroke-width="1.6"/>
+        <line x1="220" y1="470" x2="220" y2="500" stroke="#ea008a" stroke-width="2" stroke-dasharray="6 4"/>
+        <g stroke="#1b1f45" stroke-width="0.5">
+          <line x1="80" y1="466" x2="80" y2="436"/><line x1="360" y1="466" x2="360" y2="436"/>
+          <line x1="80" y1="504" x2="80" y2="536"/><line x1="220" y1="504" x2="220" y2="536"/><line x1="360" y1="504" x2="360" y2="536"/>
+          <line x1="76" y1="470" x2="48" y2="470"/><line x1="76" y1="500" x2="48" y2="500"/>
+        </g>
+        <line x1="80" y1="444" x2="360" y2="444" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text x="220" y="438" font-size="13" text-anchor="middle">140</text>
+        <line x1="80" y1="528" x2="220" y2="528" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <line x1="220" y1="528" x2="360" y2="528" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text x="150" y="522" font-size="13" text-anchor="middle">70</text>
+        <text x="290" y="522" font-size="13" text-anchor="middle">70</text>
+        <line x1="56" y1="470" x2="56" y2="500" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text transform="rotate(-90 50 485)" x="50" y="485" font-size="13" text-anchor="middle">15</text>
+
+        <!-- STEP 3 -->
+        <text x="80" y="590" font-size="11" font-weight="bold" letter-spacing="1.6" fill="#ea008a">STEP 3</text>
+        <text x="140" y="590" font-size="13">Cut on the mark: two slats, 70 &times; 15 each</text>
+        <rect x="80" y="646" width="140" height="30" fill="#f4f5f9" stroke="#1b1f45" stroke-width="1.6"/>
+        <rect x="250" y="646" width="140" height="30" fill="#f4f5f9" stroke="#1b1f45" stroke-width="1.6"/>
+        <text x="150" y="666" font-size="12" font-weight="bold" text-anchor="middle">A</text>
+        <text x="320" y="666" font-size="12" font-weight="bold" text-anchor="middle">A</text>
+        <g stroke="#1b1f45" stroke-width="0.5">
+          <line x1="80" y1="642" x2="80" y2="612"/><line x1="220" y1="642" x2="220" y2="612"/>
+          <line x1="250" y1="642" x2="250" y2="612"/><line x1="390" y1="642" x2="390" y2="612"/>
+          <line x1="76" y1="646" x2="48" y2="646"/><line x1="76" y1="676" x2="48" y2="676"/>
+        </g>
+        <line x1="80" y1="620" x2="220" y2="620" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <line x1="250" y1="620" x2="390" y2="620" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text x="150" y="614" font-size="13" text-anchor="middle">70</text>
+        <text x="320" y="614" font-size="13" text-anchor="middle">70</text>
+        <line x1="56" y1="646" x2="56" y2="676" stroke="#1b1f45" stroke-width="0.6" marker-start="url(#gA)" marker-end="url(#gA)"/>
+        <text transform="rotate(-90 50 661)" x="50" y="661" font-size="13" text-anchor="middle">15</text>
+        <text x="80" y="708" font-size="13" fill="#6b7091">Repeat steps 1 to 3 five times for 10 slats: 9 for the coaster, 1 spare.</text>
+      </g>
+    </svg>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Cutting sequence</h2>
+    <p class="lede">Watch the full sequence, or tap a step to jump straight to it. Drag to turn the view.</p>
+    <div class="stage seq" id="seqStage">
+      <canvas id="sc" tabindex="0" aria-label="Animation of the slats being cut from the board and stacked into the coaster."></canvas>
+      <div class="ov" aria-live="polite"><b id="ovStep">Step 1</b><span id="ovText">Mark 15 mm from the end</span></div>
+      <div class="count"><span id="countLabel">Slats cut</span><strong id="countVal">0 / 10</strong></div>
+    </div>
+    <div class="player">
+      <button type="button" class="ctl" id="play">Play</button>
+      <input type="range" id="scrub" min="0" max="1" step="0.01" value="0" aria-label="Animation position">
+      <span class="time" id="time">0:00 / 0:00</span>
+    </div>
+    <ol class="chapters" id="chapters"></ol>
+  </section>
+
+  <section>
+    <div class="rule"></div>
+    <h2>Slat spacing</h2>
+    <p class="lede">Turn each layer 90&deg; to the one below. The outer slats sit flush with the edges and the middle slat is centred, leaving two 12.5 mm gaps. A small dot of PVA at each crossing is enough.</p>
+    <svg class="guide" viewBox="0 0 760 660" role="img" aria-label="Engineering drawing of the coaster. Plan view: 70 by 70 millimetres, three 15 millimetre slats per layer with two 12.5 millimetre gaps. Front elevation: three 12 millimetre layers, 36 millimetres tall overall, with the middle layer seen end on.">
+      <defs>
+        <marker id="sH" viewBox="0 0 10 4" refX="10" refY="2" markerWidth="9" markerHeight="3.6" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0 L10 2 L0 4 z" fill="#1b1f45"/></marker>
+      </defs>
+      <g font-family="Helvetica, Arial, sans-serif" fill="#1b1f45" stroke-linecap="square">
+        <rect x="10" y="10" width="740" height="640" fill="none" stroke="#1b1f45" stroke-width="1.2"/>
+        <rect x="16" y="16" width="728" height="628" fill="none" stroke="#1b1f45" stroke-width="0.5"/>
+
+        <!-- PLAN: layer 2 below, layer 3 on top -->
+        <g fill="#eef0f6" stroke="#1b1f45" stroke-width="1.2">
+          <rect x="260" y="100" width="60" height="280"/><rect x="370" y="100" width="60" height="280"/><rect x="480" y="100" width="60" height="280"/>
+        </g>
+        <g fill="#fbfbfd" stroke="#1b1f45" stroke-width="1.6">
+          <rect x="260" y="100" width="280" height="60"/><rect x="260" y="210" width="280" height="60"/><rect x="260" y="320" width="280" height="60"/>
+        </g>
+
+        <!-- plan extension lines -->
+        <g stroke="#1b1f45" stroke-width="0.5">
+          <line x1="260" y1="96" x2="260" y2="34"/><line x1="320" y1="96" x2="320" y2="62"/><line x1="370" y1="96" x2="370" y2="62"/>
+          <line x1="430" y1="96" x2="430" y2="62"/><line x1="480" y1="96" x2="480" y2="62"/><line x1="540" y1="96" x2="540" y2="34"/>
+          <line x1="256" y1="100" x2="186" y2="100"/><line x1="256" y1="160" x2="214" y2="160"/><line x1="256" y1="210" x2="214" y2="210"/>
+          <line x1="256" y1="270" x2="214" y2="270"/><line x1="256" y1="320" x2="214" y2="320"/><line x1="256" y1="380" x2="186" y2="380"/>
+        </g>
+        <!-- plan chain along the top (layer 2) -->
+        <g stroke="#1b1f45" stroke-width="0.6">
+          <line x1="260" y1="70" x2="320" y2="70" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="320" y1="70" x2="370" y2="70" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="370" y1="70" x2="430" y2="70" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="430" y1="70" x2="480" y2="70" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="480" y1="70" x2="540" y2="70" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="260" y1="42" x2="540" y2="42" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="100" x2="222" y2="160" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="160" x2="222" y2="210" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="210" x2="222" y2="270" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="270" x2="222" y2="320" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="320" x2="222" y2="380" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="194" y1="100" x2="194" y2="380" marker-start="url(#sH)" marker-end="url(#sH)"/>
+        </g>
+        <g font-size="13" text-anchor="middle">
+          <text x="290" y="64">15</text><text x="345" y="64">12.5</text><text x="400" y="64">15</text><text x="455" y="64">12.5</text><text x="510" y="64">15</text>
+          <text x="400" y="36">70</text>
+          <text transform="rotate(-90 216 130)" x="216" y="130">15</text>
+          <text transform="rotate(-90 216 185)" x="216" y="185">12.5</text>
+          <text transform="rotate(-90 216 240)" x="216" y="240">15</text>
+          <text transform="rotate(-90 216 295)" x="216" y="295">12.5</text>
+          <text transform="rotate(-90 216 350)" x="216" y="350">15</text>
+          <text transform="rotate(-90 188 240)" x="188" y="240">70</text>
+        </g>
+        <text x="566" y="244" font-size="11" font-weight="bold" letter-spacing="1.4">PLAN</text>
+
+        <!-- FRONT ELEVATION -->
+        <rect x="260" y="450" width="280" height="48" fill="#fbfbfd" stroke="#1b1f45" stroke-width="1.6"/>
+        <g fill="#eef0f6" stroke="#1b1f45" stroke-width="1.6">
+          <rect x="260" y="498" width="60" height="48"/><rect x="370" y="498" width="60" height="48"/><rect x="480" y="498" width="60" height="48"/>
+        </g>
+        <rect x="260" y="546" width="280" height="48" fill="#fbfbfd" stroke="#1b1f45" stroke-width="1.6"/>
+        <g stroke="#1b1f45" stroke-width="0.5">
+          <line x1="256" y1="450" x2="186" y2="450"/><line x1="256" y1="498" x2="214" y2="498"/><line x1="256" y1="546" x2="214" y2="546"/><line x1="256" y1="594" x2="186" y2="594"/>
+          <line x1="260" y1="598" x2="260" y2="626"/><line x1="540" y1="598" x2="540" y2="626"/>
+        </g>
+        <g stroke="#1b1f45" stroke-width="0.6">
+          <line x1="222" y1="450" x2="222" y2="498" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="498" x2="222" y2="546" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="222" y1="546" x2="222" y2="594" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="194" y1="450" x2="194" y2="594" marker-start="url(#sH)" marker-end="url(#sH)"/>
+          <line x1="260" y1="618" x2="540" y2="618" marker-start="url(#sH)" marker-end="url(#sH)"/>
+        </g>
+        <g font-size="13" text-anchor="middle">
+          <text transform="rotate(-90 216 474)" x="216" y="474">12</text>
+          <text transform="rotate(-90 216 522)" x="216" y="522">12</text>
+          <text transform="rotate(-90 216 570)" x="216" y="570">12</text>
+          <text transform="rotate(-90 188 522)" x="188" y="522">36</text>
+          <text x="400" y="612">70</text>
+        </g>
+        <g font-size="12" fill="#6b7091">
+          <text x="556" y="478">Layer 3</text><text x="556" y="526">Layer 2</text><text x="556" y="574">Layer 1</text>
+        </g>
+        <text x="566" y="440" font-size="11" font-weight="bold" letter-spacing="1.4">FRONT</text>
+      </g>
+    </svg>
+  </section>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-(function () {
-  var stage = document.getElementById('stage');
-  var canvas = document.getElementById('c');
-  var tip = document.getElementById('tip');
-  try {
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-    run(renderer);
-  } catch (err) {
-    stage.insertAdjacentHTML('beforeend', '<p class="fail">The 3D view needs WebGL, which is not available in this browser. The cut list below still works.</p>');
+/* Shared helpers for both 3D views */
+window.Kit = (function () {
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
   }
-
-  function run(renderer) {
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(34, 1, 5, 3000);
-    var dirty = true;
-
-    function makeWood() {
-      var c = document.createElement('canvas');
-      c.width = 256; c.height = 512;
-      var g = c.getContext('2d');
-      g.fillStyle = '#e2c48f';
-      g.fillRect(0, 0, 256, 512);
-      var i, k;
-      for (i = 0; i < 150; i++) {
-        var x = Math.random() * 256;
-        var w = 0.5 + Math.random() * 2.2;
-        var amp = 1 + Math.random() * 3;
-        var ph = Math.random() * 6.28;
-        var cyc = 1 + Math.floor(Math.random() * 2);
-        g.strokeStyle = 'rgba(' + (145 + Math.random() * 35 | 0) + ',' + (100 + Math.random() * 30 | 0) + ',55,' + (0.07 + Math.random() * 0.2).toFixed(3) + ')';
-        g.lineWidth = w;
-        g.beginPath();
-        for (k = 0; k <= 512; k += 16) {
-          var xx = x + Math.sin(k / 512 * 6.2832 * cyc + ph) * amp;
-          if (k === 0) g.moveTo(xx, k); else g.lineTo(xx, k);
-        }
-        g.stroke();
+  function makeWood(seed) {
+    var R = rng(seed || 7);
+    var c = document.createElement('canvas');
+    c.width = 256; c.height = 512;
+    var g = c.getContext('2d');
+    g.fillStyle = '#e2c48f';
+    g.fillRect(0, 0, 256, 512);
+    for (var i = 0; i < 150; i++) {
+      var x = R() * 256, w = 0.5 + R() * 2.2, amp = 1 + R() * 3, ph = R() * 6.28, cyc = 1 + Math.floor(R() * 2);
+      g.strokeStyle = 'rgba(' + (145 + R() * 35 | 0) + ',' + (100 + R() * 30 | 0) + ',55,' + (0.07 + R() * 0.2).toFixed(3) + ')';
+      g.lineWidth = w;
+      g.beginPath();
+      for (var k = 0; k <= 512; k += 16) {
+        var xx = x + Math.sin(k / 512 * 6.2832 * cyc + ph) * amp;
+        if (k === 0) g.moveTo(xx, k); else g.lineTo(xx, k);
       }
-      var t = new THREE.CanvasTexture(c);
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
-      t.encoding = THREE.sRGBEncoding;
-      t.anisotropy = 4;
-      return t;
+      g.stroke();
     }
-    var wood = makeWood();
-
-    function mapUV(geom, grain) {
-      var pos = geom.attributes.position, nor = geom.attributes.normal;
-      var uv = new Float32Array(pos.count * 2);
-      var S = 1 / 70;
-      var gi = { x: 0, y: 1, z: 2 }[grain];
-      for (var i = 0; i < pos.count; i++) {
-        var p = [pos.getX(i), pos.getY(i), pos.getZ(i)];
-        var n = [Math.abs(nor.getX(i)), Math.abs(nor.getY(i)), Math.abs(nor.getZ(i))];
-        var d = 0;
-        if (n[1] > n[d]) d = 1;
-        if (n[2] > n[d]) d = 2;
-        var axes = [0, 1, 2].filter(function (a) { return a !== d; });
-        var u, v;
-        if (axes.indexOf(gi) !== -1) {
-          v = p[gi];
-          u = p[axes[0] === gi ? axes[1] : axes[0]];
-        } else {
-          u = p[axes[0]]; v = p[axes[1]];
-        }
-        uv[2 * i] = u * S; uv[2 * i + 1] = v * S;
-      }
-      geom.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = 4;
+    return t;
+  }
+  function mapUV(geom, grain, shift) {
+    var pos = geom.attributes.position, nor = geom.attributes.normal;
+    var uv = new Float32Array(pos.count * 2);
+    var S = 1 / 150, gi = { x: 0, y: 1, z: 2 }[grain], sh = shift || 0;
+    for (var i = 0; i < pos.count; i++) {
+      var p = [pos.getX(i), pos.getY(i), pos.getZ(i)];
+      var n = [Math.abs(nor.getX(i)), Math.abs(nor.getY(i)), Math.abs(nor.getZ(i))];
+      var d = 0;
+      if (n[1] > n[d]) d = 1;
+      if (n[2] > n[d]) d = 2;
+      var axes = [0, 1, 2].filter(function (a) { return a !== d; });
+      var u, v;
+      if (axes.indexOf(gi) !== -1) { v = p[gi]; u = p[axes[0] === gi ? axes[1] : axes[0]]; }
+      else { u = p[axes[0]]; v = p[axes[1]]; }
+      uv[2 * i] = (u + sh) * S; uv[2 * i + 1] = v * S;
     }
-
-    function woodMesh(geo, grain, tint) {
-      mapUV(geo, grain);
-      var m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: wood, color: tint, roughness: 0.9, metalness: 0 }));
-      m.castShadow = true; m.receiveShadow = true;
-      return m;
-    }
-
-    function boxGeo(x0, x1, y0, y1, z0, z1) {
-      var g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
-      g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
-      return g;
-    }
-
-    var movers = [];
-    var pickable = [];
-    var root = new THREE.Group();
-    scene.add(root);
-
-    function part(off, label, size) {
-      var g = new THREE.Group();
-      g.userData = {
-        base: new THREE.Vector3(0, 0, 0),
-        off: new THREE.Vector3(off[0], off[1], off[2]),
-        label: label, size: size
-      };
-      root.add(g); movers.push(g);
-      return g;
-    }
-    function pick(group, mesh) {
-      mesh.userData.owner = group;
-      pickable.push(mesh);
-      group.add(mesh);
-    }
-
-    var TINTS = [0xf1dcb6, 0xf6e6c8, 0xf4e1bd, 0xecd5ab, 0xe9d1a4, 0xf3dfba];
-
-    // Top slats (A): 100 long, 15 wide, 5 thick, sitting at y 17 to 22
-    [0, 21.25, 42.5, 63.75, 85].forEach(function (x, i) {
-      var c = x + 7.5;
-      var g = part([(c - 50) * 0.62, 78, 0], 'A  Top slat', '100 \u00d7 15 \u00d7 5 mm');
-      pick(g, woodMesh(boxGeo(x, x + 15, 17, 22, 0, 100), 'z', TINTS[i % 6]));
-    });
-
-    // Bearers (B): 100 long, 15 wide, 12 thick, y 5 to 17
-    [0, 42.5, 85].forEach(function (z, i) {
-      var c = z + 7.5;
-      var g = part([0, 34, (c - 50) * 0.55], 'B  Bearer', '100 \u00d7 15 \u00d7 12 mm');
-      pick(g, woodMesh(boxGeo(0, 100, 5, 17, z, z + 15), 'x', TINTS[(i + 2) % 6]));
-    });
-
-    // Bottom boards (C): 100 long, 15 wide, 5 thick, y 0 to 5
-    [0, 42.5, 85].forEach(function (x, i) {
-      var c = x + 7.5;
-      var g = part([(c - 50) * 1.05, 0, 0], 'C  Bottom board', '100 \u00d7 15 \u00d7 5 mm');
-      pick(g, woodMesh(boxGeo(x, x + 15, 0, 5, 0, 100), 'z', TINTS[(i + 4) % 6]));
-    });
-
-    var ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.ShadowMaterial({ opacity: 0.16 }));
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.set(50, -0.6, 50);
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    var target = new THREE.Vector3(50, 20, 50);
+    geom.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  }
+  function boxGeo(x0, x1, y0, y1, z0, z1) {
+    var g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
+    g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+    return g;
+  }
+  function woodMesh(geo, grain, tint, wood, shift) {
+    mapUV(geo, grain, shift);
+    var m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: wood, color: tint, roughness: 0.9, metalness: 0 }));
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+  }
+  function lights(scene, target, span) {
     scene.add(new THREE.HemisphereLight(0xffffff, 0x8a7a62, 0.72));
     var sun = new THREE.DirectionalLight(0xffffff, 0.95);
-    sun.position.set(210, 380, 300);
+    sun.position.set(target.x + 260, target.y + 520, target.z + 420);
     sun.target.position.copy(target);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     var sc = sun.shadow.camera;
-    sc.left = -220; sc.right = 220; sc.top = 220; sc.bottom = -220; sc.near = 40; sc.far = 1100;
+    sc.left = -span; sc.right = span; sc.top = span; sc.bottom = -span; sc.near = 50; sc.far = 1800;
     sun.shadow.bias = -0.0006;
-    sun.shadow.normalBias = 0.4;
+    sun.shadow.normalBias = 0.6;
     scene.add(sun); scene.add(sun.target);
     var fill = new THREE.DirectionalLight(0xfff4e0, 0.35);
-    fill.position.set(-240, 160, -180);
+    fill.position.set(target.x - 360, target.y + 200, target.z - 260);
     scene.add(fill);
-
-    var theta = 0.72, phi = 1.05, radius = 300;
-    var expl = 0, explTarget = 0;
-    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-    function updateCam() {
-      var r = radius * (1 + 0.3 * expl);
-      camera.position.set(
-        target.x + r * Math.sin(phi) * Math.sin(theta),
-        target.y + r * Math.cos(phi),
-        target.z + r * Math.sin(phi) * Math.cos(theta)
-      );
-      camera.lookAt(target);
-      dirty = true;
-    }
-    function applyExpl() {
-      movers.forEach(function (g) {
-        g.position.copy(g.userData.base).addScaledVector(g.userData.off, expl);
-      });
-      updateCam();
-    }
-
-    var ray = new THREE.Raycaster();
-    var ndc = new THREE.Vector2();
-    var active = null;
-    function setActive(group) {
-      if (active === group) return;
-      pickable.forEach(function (m) {
-        var on = group && m.userData.owner === group;
-        m.material.emissive.setHex(on ? 0xea008a : 0x000000);
-        m.material.emissiveIntensity = on ? 0.38 : 0;
-      });
-      active = group;
-      if (group) {
-        tip.innerHTML = '<b>' + group.userData.label + '</b>' + group.userData.size;
-        tip.classList.add('on');
-      } else {
-        tip.classList.remove('on');
-      }
-      dirty = true;
-    }
-    function hover(clientX, clientY) {
-      var r = canvas.getBoundingClientRect();
-      ndc.x = ((clientX - r.left) / r.width) * 2 - 1;
-      ndc.y = -((clientY - r.top) / r.height) * 2 + 1;
-      ray.setFromCamera(ndc, camera);
-      var hits = ray.intersectObjects(pickable, false);
-      if (hits.length) {
-        setActive(hits[0].object.userData.owner);
-        tip.style.left = (clientX - r.left) + 'px';
-        tip.style.top = (clientY - r.top) + 'px';
-      } else {
-        setActive(null);
-      }
-    }
-
+  }
+  function ground(scene, x, z) {
+    var g = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600), new THREE.ShadowMaterial({ opacity: 0.16 }));
+    g.rotation.x = -Math.PI / 2;
+    g.position.set(x, -0.5, z);
+    g.receiveShadow = true;
+    scene.add(g);
+  }
+  function orbit(canvas, st, onChange, onTap) {
     var ptrs = new Map(), lastDist = 0, moved = false;
-    function pinchDist() {
-      var a = Array.from(ptrs.values());
-      return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1;
-    }
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function pinch() { var a = Array.from(ptrs.values()); return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1; }
     canvas.addEventListener('pointerdown', function (e) {
       canvas.setPointerCapture(e.pointerId);
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
       moved = false;
-      if (ptrs.size === 2) lastDist = pinchDist();
-      if (e.pointerType !== 'mouse') hover(e.clientX, e.clientY);
+      if (ptrs.size === 2) lastDist = pinch();
+      if (onTap && e.pointerType !== 'mouse') onTap(e.clientX, e.clientY, false);
     });
     canvas.addEventListener('pointermove', function (e) {
       var p = ptrs.get(e.pointerId);
-      if (!p) { if (e.pointerType === 'mouse') hover(e.clientX, e.clientY); return; }
+      if (!p) { if (onTap && e.pointerType === 'mouse') onTap(e.clientX, e.clientY, false); return; }
       var dx = e.clientX - p.x, dy = e.clientY - p.y;
       p.x = e.clientX; p.y = e.clientY;
       if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
-      if (moved) setActive(null);
+      if (moved && onTap) onTap(0, 0, true);
       if (ptrs.size === 1) {
-        theta -= dx * 0.008;
-        phi = clamp(phi - dy * 0.008, 0.2, 2.9);
-        updateCam();
+        st.theta -= dx * 0.008;
+        st.phi = clamp(st.phi - dy * 0.008, 0.2, 1.52);
+        onChange();
       } else if (ptrs.size === 2) {
-        var d = pinchDist();
-        radius = clamp(radius * lastDist / d, 150, 640);
+        var d = pinch();
+        st.zoom = clamp(st.zoom * lastDist / d, st.zMin, st.zMax);
         lastDist = d;
-        updateCam();
+        onChange();
       }
     });
-    function endPtr(e) { ptrs.delete(e.pointerId); }
-    canvas.addEventListener('pointerup', endPtr);
-    canvas.addEventListener('pointercancel', endPtr);
-    canvas.addEventListener('pointerleave', function () { setActive(null); });
+    function end(e) { ptrs.delete(e.pointerId); }
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+    canvas.addEventListener('pointerleave', function () { if (onTap) onTap(0, 0, true); });
     canvas.addEventListener('wheel', function (e) {
       e.preventDefault();
-      radius = clamp(radius * (1 + e.deltaY * 0.001), 150, 640);
-      updateCam();
+      st.zoom = clamp(st.zoom * (1 + e.deltaY * 0.001), st.zMin, st.zMax);
+      onChange();
     }, { passive: false });
     canvas.addEventListener('keydown', function (e) {
       var used = true;
-      if (e.key === 'ArrowLeft') theta -= 0.12;
-      else if (e.key === 'ArrowRight') theta += 0.12;
-      else if (e.key === 'ArrowUp') phi = clamp(phi - 0.1, 0.2, 2.9);
-      else if (e.key === 'ArrowDown') phi = clamp(phi + 0.1, 0.2, 2.9);
+      if (e.key === 'ArrowLeft') st.theta -= 0.12;
+      else if (e.key === 'ArrowRight') st.theta += 0.12;
+      else if (e.key === 'ArrowUp') st.phi = clamp(st.phi - 0.1, 0.2, 1.52);
+      else if (e.key === 'ArrowDown') st.phi = clamp(st.phi + 0.1, 0.2, 1.52);
       else used = false;
-      if (used) { e.preventDefault(); updateCam(); }
+      if (used) { e.preventDefault(); onChange(); }
     });
-
-    var btns = document.querySelectorAll('.seg button');
-    Array.prototype.forEach.call(btns, function (b) {
-      b.addEventListener('click', function () {
-        explTarget = b.getAttribute('data-mode') === 'exploded' ? 1 : 0;
-        setActive(null);
-        if (reduced) { expl = explTarget; applyExpl(); }
-        Array.prototype.forEach.call(btns, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-      });
-    });
-
-    function resize() {
-      var w = stage.clientWidth, h = stage.clientHeight;
-      if (!w || !h) return;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      dirty = true;
-    }
-    if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
-    window.addEventListener('resize', resize);
-
-    function frame() {
-      if (expl !== explTarget) {
-        var d = explTarget - expl;
-        expl = Math.abs(d) < 0.002 ? explTarget : expl + d * 0.14;
-        applyExpl();
-      }
-      if (dirty) { renderer.render(scene, camera); dirty = false; }
-      requestAnimationFrame(frame);
-    }
-    resize();
-    applyExpl();
-    frame();
   }
+  return { makeWood: makeWood, boxGeo: boxGeo, woodMesh: woodMesh, lights: lights, ground: ground, orbit: orbit };
+})();
+</script>
+
+<script>
+/* Model view: assembled and exploded */
+(function () {
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('c');
+  var tip = document.getElementById('tip');
+  var renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  } catch (err) {
+    stage.insertAdjacentHTML('beforeend', '<p class="fail">The 3D view needs WebGL, which is not available in this browser. The cut list below still works.</p>');
+    return;
+  }
+  var K = window.Kit;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(34, 1, 10, 4000);
+  var dirty = true;
+  var wood = K.makeWood(11);
+
+  var OFF = [-27.5, 0, 27.5];
+  var TINTS = [0xf1dcb6, 0xf6e6c8, 0xf4e1bd, 0xecd5ab, 0xf3dfba, 0xe9d1a4, 0xf2ddb4, 0xeed8b0, 0xf5e3c2];
+  var movers = [], pickable = [], layers = [[], [], []];
+  var root = new THREE.Group();
+  scene.add(root);
+
+  for (var k = 0; k < 3; k++) {
+    for (var m = 0; m < 3; m++) {
+      var y0 = k * 12, o = OFF[m], along = k % 2 === 0;
+      var geo = along ? K.boxGeo(-35, 35, y0, y0 + 12, o - 7.5, o + 7.5) : K.boxGeo(o - 7.5, o + 7.5, y0, y0 + 12, -35, 35);
+      var g = new THREE.Group();
+      var off = along ? [0, k * 36, o * 0.22] : [o * 0.22, k * 36, 0];
+      g.userData = {
+        base: new THREE.Vector3(0, 0, 0), off: new THREE.Vector3(off[0], off[1], off[2]),
+        label: 'A  Slat, layer ' + (k + 1), size: '70 \u00d7 15 \u00d7 12 mm', layer: k
+      };
+      var mesh = K.woodMesh(geo, along ? 'z' : 'x', TINTS[k * 3 + m], wood, (k * 3 + m) * 37);
+      mesh.userData.owner = g;
+      g.add(mesh);
+      root.add(g);
+      movers.push(g); pickable.push(mesh); layers[k].push(g);
+    }
+  }
+
+  var target = new THREE.Vector3(0, 18, 0);
+  K.ground(scene, 0, 0);
+  K.lights(scene, target, 200);
+
+  var st = { theta: 0.72, phi: 1.05, zoom: 1, zMin: 0.5, zMax: 2 };
+  var BASE_R = 225;
+  var expl = 0, explTarget = 0;
+  function updateCam() {
+    var r = BASE_R * st.zoom * (1 + 0.45 * expl);
+    var ty = target.y + 36 * expl;
+    camera.position.set(
+      target.x + r * Math.sin(st.phi) * Math.sin(st.theta),
+      ty + r * Math.cos(st.phi),
+      target.z + r * Math.sin(st.phi) * Math.cos(st.theta)
+    );
+    camera.lookAt(target.x, ty, target.z);
+    dirty = true;
+  }
+  function applyExpl() {
+    movers.forEach(function (g) { g.position.copy(g.userData.base).addScaledVector(g.userData.off, expl); });
+    updateCam();
+  }
+
+  var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), active = null;
+  function setActive(group) {
+    if (active === group) return;
+    pickable.forEach(function (mm) {
+      var on = group && mm.userData.owner === group;
+      mm.material.emissive.setHex(on ? 0xea008a : 0x000000);
+      mm.material.emissiveIntensity = on ? 0.38 : 0;
+    });
+    active = group;
+    if (group) { tip.innerHTML = '<b>' + group.userData.label + '</b>' + group.userData.size; tip.classList.add('on'); }
+    else tip.classList.remove('on');
+    dirty = true;
+  }
+  function hover(cx, cy, clear) {
+    if (clear) { setActive(null); return; }
+    var r = canvas.getBoundingClientRect();
+    ndc.x = ((cx - r.left) / r.width) * 2 - 1;
+    ndc.y = -((cy - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    var hits = ray.intersectObjects(pickable, false);
+    if (hits.length) {
+      setActive(hits[0].object.userData.owner);
+      tip.style.left = (cx - r.left) + 'px';
+      tip.style.top = (cy - r.top) + 'px';
+    } else setActive(null);
+  }
+  K.orbit(canvas, st, updateCam, hover);
+
+  var btns = document.querySelectorAll('.seg button');
+  Array.prototype.forEach.call(btns, function (b) {
+    b.addEventListener('click', function () {
+      explTarget = b.getAttribute('data-mode') === 'exploded' ? 1 : 0;
+      setActive(null);
+      if (reduced) { expl = explTarget; applyExpl(); }
+      Array.prototype.forEach.call(btns, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    });
+  });
+
+  function resize() {
+    var w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    dirty = true;
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  window.addEventListener('resize', resize);
+
+  function frame() {
+    if (expl !== explTarget) {
+      var d = explTarget - expl;
+      expl = Math.abs(d) < 0.002 ? explTarget : expl + d * 0.14;
+      applyExpl();
+    }
+    if (dirty) { renderer.render(scene, camera); dirty = false; }
+    requestAnimationFrame(frame);
+  }
+  resize();
+  applyExpl();
+  frame();
+
+  /* Hook used to produce still images for the print sheets */
+  window.__coaster = {
+    snap: function (e, w, h, theta, phi, zoom) {
+      expl = explTarget = e;
+      if (theta != null) st.theta = theta;
+      if (phi != null) st.phi = phi;
+      if (zoom != null) st.zoom = zoom;
+      renderer.setPixelRatio(1);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      applyExpl();
+      renderer.render(scene, camera);
+      var tags = layers.map(function (L) {
+        var c = new THREE.Vector3();
+        L.forEach(function (g) { c.add(g.position); });
+        c.multiplyScalar(1 / 3);
+        var k = L[0].userData.layer;
+        var p = new THREE.Vector3(c.x, k * 12 + 6, c.z);
+        p.add(new THREE.Vector3(0, 0, 0));
+        var ref = L[0].userData.off;
+        p.y += ref.y * e;
+        p.project(camera);
+        return { x: (p.x + 1) / 2 * 100, y: (1 - p.y) / 2 * 100 };
+      });
+      return { url: canvas.toDataURL('image/png'), tags: tags };
+    }
+  };
+})();
+</script>
+
+<script>
+/* Cutting sequence animation */
+(function () {
+  var stage = document.getElementById('seqStage');
+  var canvas = document.getElementById('sc');
+  var renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  } catch (err) {
+    stage.insertAdjacentHTML('beforeend', '<p class="fail">The animation needs WebGL, which is not available in this browser.</p>');
+    return;
+  }
+  var K = window.Kit;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(34, 1, 10, 5000);
+  var wood = K.makeWood(23);
+  var PI = Math.PI;
+
+  /* ---- Geometry ---- */
+  var OFF = [-27.5, 0, 27.5];
+  var STATION = 90;
+  var boardG = new THREE.Group();
+  scene.add(boardG);
+  boardG.add(K.woodMesh(K.boxGeo(-180, -75, 0, 12, -70, 70), 'x', 0xf1dcb6, wood));
+
+  var TINTS = [0xf1dcb6, 0xf3dfba, 0xf0dab2, 0xf2ddb4, 0xeed8b0];
+  var halves = [];
+  for (var j = 0; j < 5; j++) {
+    for (var h = 0; h < 2; h++) {
+      var geo = K.boxGeo(-7.5, 7.5, -6, 6, -35, 35);
+      var mesh = K.woodMesh(geo, 'x', TINTS[j], wood, 0);
+      /* shift UVs so the grain lines up with where the slat sat in the board */
+      var uv = mesh.geometry.attributes.uv;
+      for (var q = 0; q < uv.count; q++) {
+        uv.setX(q, uv.getX(q) + (h ? 35 : -35) / 150);
+        uv.setY(q, uv.getY(q) + (-15 * j - 7.5) / 150);
+      }
+      uv.needsUpdate = true;
+      scene.add(mesh);
+      halves.push(mesh);
+    }
+  }
+
+  var grooveMat = new THREE.MeshStandardMaterial({ color: 0x5b4128, roughness: 1 });
+  var grooveA = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1, 140.4), grooveMat);
+  var grooveB = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1, 15.4), grooveMat);
+  scene.add(grooveA); scene.add(grooveB);
+
+  var markMat = new THREE.MeshBasicMaterial({ color: 0xea008a });
+  var markA = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 140), markMat);
+  var markB = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 15), markMat);
+  scene.add(markA); scene.add(markB);
+
+  /* Saw: origin at the centre of the blade's cutting edge */
+  var saw = new THREE.Group();
+  var steel = new THREE.MeshStandardMaterial({ color: 0xc3c8d0, metalness: 0.65, roughness: 0.32 });
+  var spineM = new THREE.MeshStandardMaterial({ color: 0x3a3f55, metalness: 0.5, roughness: 0.45 });
+  var handleM = new THREE.MeshStandardMaterial({ color: 0xea008a, roughness: 0.6 });
+  var blade = new THREE.Mesh(K.boxGeo(-0.4, 0.4, 0, 48, -100, 115), steel);
+  var spine = new THREE.Mesh(K.boxGeo(-1.4, 1.4, 42, 52, -100, 115), spineM);
+  /* D-shaped handle at the far end, drawn in z/y then turned to face across x */
+  var hs = new THREE.Shape();
+  hs.moveTo(-96, 14); hs.lineTo(-128, 8); hs.quadraticCurveTo(-150, 6, -152, 30);
+  hs.lineTo(-156, 70); hs.quadraticCurveTo(-156, 86, -138, 86); hs.lineTo(-104, 86);
+  hs.quadraticCurveTo(-94, 86, -94, 74); hs.lineTo(-94, 22); hs.quadraticCurveTo(-94, 14, -96, 14);
+  var hole = new THREE.Path();
+  hole.moveTo(-112, 30); hole.lineTo(-134, 28); hole.quadraticCurveTo(-140, 28, -140, 36);
+  hole.lineTo(-140, 64); hole.quadraticCurveTo(-140, 70, -134, 70); hole.lineTo(-114, 70);
+  hole.quadraticCurveTo(-108, 70, -108, 64); hole.lineTo(-108, 36); hole.quadraticCurveTo(-108, 30, -112, 30);
+  hs.holes.push(hole);
+  var hg = new THREE.ExtrudeGeometry(hs, { depth: 12, bevelEnabled: true, bevelThickness: 1.5, bevelSize: 1.5, bevelSegments: 2, curveSegments: 10 });
+  hg.rotateY(-Math.PI / 2);
+  hg.translate(6, 0, 0);
+  var handle = new THREE.Mesh(hg, handleM);
+  [blade, spine, handle].forEach(function (p) { p.castShadow = true; saw.add(p); });
+  scene.add(saw);
+
+  var glue = [];
+  var glueGeo = new THREE.CylinderGeometry(3.2, 3.2, 0.9, 18);
+  var glueMat = new THREE.MeshStandardMaterial({ color: 0xf7f4ea, roughness: 0.35 });
+  for (var L = 0; L < 2; L++) {
+    for (var a = 0; a < 3; a++) {
+      for (var b = 0; b < 3; b++) {
+        var gm = new THREE.Mesh(glueGeo, glueMat);
+        gm.position.set(STATION + OFF[a], 12 * (L + 1) + 0.45, OFF[b]);
+        scene.add(gm);
+        glue.push(gm);
+      }
+    }
+  }
+
+  K.ground(scene, 0, -40);
+  K.lights(scene, new THREE.Vector3(0, 0, -40), 320);
+
+  /* ---- Timeline ---- */
+  var cyc = [], t0 = 0.8;
+  for (j = 0; j < 5; j++) {
+    var f = j === 0 ? 1 : 0.5, c = { f: f, n1: j ? 3 : 5, n2: j ? 2 : 4 };
+    c.mA0 = t0;              c.mA1 = c.mA0 + 1.2 * f;
+    c.iA1 = c.mA1 + 0.6 * f; c.cA1 = c.iA1 + 2.8 * f; c.oA1 = c.cA1 + 0.5 * f;
+    c.mv1 = c.oA1 + 1.3 * f; c.mB1 = c.mv1 + 0.9 * f;
+    c.iB1 = c.mB1 + 0.9 * f; c.cB1 = c.iB1 + 2.0 * f; c.oB1 = c.cB1 + 0.5 * f;
+    c.sp1 = c.oB1 + 0.5 * f; c.pl1 = c.sp1 + 0.9 * f;
+    cyc.push(c); t0 = c.pl1;
+  }
+  var A0 = t0 + 0.3;
+  var LS = [A0 + 0.9];
+  var G1 = LS[0] + 1.9; LS.push(G1 + 0.8);
+  var G2 = LS[1] + 1.9; LS.push(G2 + 0.8);
+  var GS = [G1, G2];
+  var TOTAL = LS[2] + 0.9 + 0.9 + 2.0;
+
+  var STEPS = [
+    { t: 0, text: 'Mark 15 mm from the end of the board' },
+    { t: cyc[0].mA1, text: 'Saw on the line to cut off the strip' },
+    { t: cyc[0].mv1, text: 'Mark the centre of the strip, 70 mm along' },
+    { t: cyc[0].mB1, text: 'Cut the strip in half' },
+    { t: cyc[1].mA0, text: 'Repeat until you have 10 slats (9 plus a spare)' },
+    { t: A0, text: 'Glue and stack three layers, turning each layer 90\u00b0' }
+  ];
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function seg(t, a, b) { return clamp((t - a) / (b - a), 0, 1); }
+  function E(u) { return u * u * (3 - 2 * u); }
+  function lerp(a, b, u) { return a + (b - a) * u; }
+  var RAISE = 42;
+
+  function sawY(t, c) {
+    if (t < c.mA1) return RAISE;
+    if (t < c.iA1) return lerp(RAISE, 12, E(seg(t, c.mA1, c.iA1)));
+    if (t < c.cA1) return lerp(12, -0.6, seg(t, c.iA1, c.cA1));
+    if (t < c.oA1) return lerp(-0.6, RAISE, E(seg(t, c.cA1, c.oA1)));
+    if (t < c.mB1) return RAISE;
+    if (t < c.mB1 + 0.45 * c.f) return RAISE;
+    if (t < c.iB1) return lerp(RAISE, 12, E(seg(t, c.mB1 + 0.45 * c.f, c.iB1)));
+    if (t < c.cB1) return lerp(12, -0.6, seg(t, c.iB1, c.cB1));
+    if (t < c.oB1) return lerp(-0.6, RAISE, E(seg(t, c.cB1, c.oB1)));
+    return RAISE;
+  }
+  function stroke(u, n) {
+    var env = Math.min(1, u * 8, (1 - u) * 8);
+    return 34 * Math.sin(2 * PI * n * u) * env;
+  }
+  function pilePos(j, h) { return [STATION + (h ? 40 : -40), 6, -(70 + 22 * j)]; }
+  function asmPos(i) {
+    var k = Math.floor(i / 3), m = i % 3;
+    return k % 2 === 0 ? { p: [STATION, 6 + 12 * k, OFF[m]], r: PI / 2 } : { p: [STATION + OFF[m], 6 + 12 * k, 0], r: 0 };
+  }
+
+  var view = { theta: 0.62, phi: 0.98, zoom: 1, zMin: 0.5, zMax: 1.8 };
+  var CUT_T = new THREE.Vector3(-15, 22, -30), ASM_T = new THREE.Vector3(STATION, 22, -12);
+  var tgt = new THREE.Vector3();
+
+  function apply(t) {
+    var j, c;
+    /* board advance */
+    var bx = 0;
+    for (j = 0; j < 4; j++) bx += 15 * E(seg(t, cyc[j].oA1, cyc[j].mv1));
+    boardG.position.x = bx;
+
+    /* slats */
+    for (j = 0; j < 5; j++) {
+      c = cyc[j];
+      for (var h = 0; h < 2; h++) {
+        var mesh = halves[j * 2 + h], zh = h ? 35 : -35, sgn = h ? 1 : -1;
+        var x, y, z, r;
+        if (t < c.oA1) { x = bx - 15 * j - 7.5; y = 6; z = zh; r = 0; }
+        else if (t < c.mv1) {
+          var u = E(seg(t, c.oA1, c.mv1));
+          r = u * PI / 2;
+          x = lerp(-7.5, STATION, u) + zh * Math.sin(r);
+          y = 6 + 30 * Math.sin(PI * u);
+          z = zh * Math.cos(r);
+        } else {
+          r = PI / 2;
+          x = STATION + zh + sgn * 5 * E(seg(t, c.oB1, c.sp1));
+          y = 6; z = 0;
+          if (t >= c.sp1) {
+            var p = E(seg(t, c.sp1, c.pl1));
+            z = lerp(0, -(70 + 22 * j), p);
+            y = 6 + 10 * Math.sin(PI * p);
+          }
+        }
+        var i = j * 2 + h;
+        if (i < 9 && t >= A0) {
+          var k = Math.floor(i / 3), m = i % 3;
+          var fs = LS[k] + 0.45 * m;
+          var fu = E(seg(t, fs, fs + 0.9));
+          if (fu > 0) {
+            var pp = pilePos(j, h), aa = asmPos(i);
+            x = lerp(pp[0], aa.p[0], fu);
+            y = lerp(pp[1], aa.p[1], fu) + 45 * Math.sin(PI * fu);
+            z = lerp(pp[2], aa.p[2], fu);
+            r = lerp(PI / 2, aa.r, fu);
+          }
+        }
+        mesh.position.set(x, y, z);
+        mesh.rotation.y = r;
+      }
+    }
+
+    /* active cycle */
+    var ai = 0;
+    for (j = 0; j < 5; j++) if (t >= cyc[j].mA0) ai = j;
+    c = cyc[ai];
+
+    /* marks and kerf grooves */
+    var sA = E(seg(t, c.mA0, c.mA1));
+    markA.visible = sA > 0 && t < c.cA1;
+    markA.scale.z = Math.max(sA, 0.001);
+    markA.position.set(-15, 12.16, -70 + 70 * sA);
+    var sB = E(seg(t, c.mv1, c.mB1));
+    markB.visible = sB > 0 && t < c.cB1;
+    markB.scale.z = Math.max(sB, 0.001);
+    markB.position.set(STATION, 12.16, -7.5 + 7.5 * sB);
+
+    var dA = 12 * seg(t, c.iA1, c.cA1);
+    grooveA.visible = t >= c.iA1 && t < c.oA1 && dA > 0.05;
+    grooveA.scale.y = Math.max(dA, 0.01);
+    grooveA.position.set(-15, 12.05 - dA / 2, 0);
+    var dB = 12 * seg(t, c.iB1, c.cB1);
+    grooveB.visible = t >= c.iB1 && t < c.oB1 && dB > 0.05;
+    grooveB.scale.y = Math.max(dB, 0.01);
+    grooveB.position.set(STATION, 12.05 - dB / 2, 0);
+
+    /* saw */
+    var sx = -15;
+    for (j = 0; j < 5; j++) {
+      var cc = cyc[j];
+      if (t >= cc.mA0) sx = lerp(j ? STATION : -15, -15, E(seg(t, cc.mA0, cc.mA1)));
+      if (t >= cc.mB1) sx = lerp(-15, STATION, E(seg(t, cc.mB1, cc.mB1 + 0.45 * cc.f)));
+    }
+    var sy = sawY(t, c), sz = 0;
+    if (t >= c.iA1 && t < c.cA1) sz = stroke(seg(t, c.iA1, c.cA1), c.n1);
+    if (t >= c.iB1 && t < c.cB1) sz = stroke(seg(t, c.iB1, c.cB1), c.n2);
+    if (t >= A0) sy = lerp(RAISE, 320, E(seg(t, A0, A0 + 0.9)));
+    saw.visible = t < A0 + 0.9;
+    saw.position.set(sx, sy, sz);
+
+    /* glue */
+    glue.forEach(function (g, gi) {
+      var L = Math.floor(gi / 9), d = gi % 9;
+      var s = E(seg(t, GS[L] + d * 0.06, GS[L] + d * 0.06 + 0.25));
+      g.visible = s > 0;
+      g.scale.set(Math.max(s, 0.001), 1, Math.max(s, 0.001));
+    });
+
+    /* camera */
+    var cb = E(seg(t, A0, A0 + 1.4));
+    tgt.copy(CUT_T).lerp(ASM_T, cb);
+    var R = lerp(540, 320, cb) * view.zoom;
+    var ph = view.phi + 0.08 * cb;
+    camera.position.set(
+      tgt.x + R * Math.sin(ph) * Math.sin(view.theta),
+      tgt.y + R * Math.cos(ph),
+      tgt.z + R * Math.sin(ph) * Math.cos(view.theta)
+    );
+    camera.lookAt(tgt);
+
+    /* overlays */
+    var si = 0;
+    for (var s = 0; s < STEPS.length; s++) if (t >= STEPS[s].t - 0.001) si = s;
+    if (si !== shownStep) {
+      shownStep = si;
+      ovStep.textContent = 'Step ' + (si + 1);
+      ovText.textContent = STEPS[si].text;
+      chapterBtns.forEach(function (bt, bi) {
+        if (bi === si) bt.setAttribute('aria-current', 'step'); else bt.removeAttribute('aria-current');
+      });
+    }
+    if (t < A0) {
+      var n = 0;
+      for (j = 0; j < 5; j++) if (t >= cyc[j].cB1) n += 2;
+      countLabel.textContent = 'Slats cut';
+      countVal.textContent = n + ' / 10';
+    } else {
+      var lay = 0;
+      for (var q = 0; q < 3; q++) if (t >= LS[q] + 0.45 * 2 + 0.9) lay = q + 1;
+      countLabel.textContent = 'Layers';
+      countVal.textContent = lay + ' / 3';
+    }
+  }
+
+  /* ---- UI ---- */
+  var ovStep = document.getElementById('ovStep'), ovText = document.getElementById('ovText');
+  var countLabel = document.getElementById('countLabel'), countVal = document.getElementById('countVal');
+  var playBtn = document.getElementById('play'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
+  var list = document.getElementById('chapters');
+  var shownStep = -1;
+  list.innerHTML = STEPS.map(function (s, i) {
+    return '<li><button type="button" data-i="' + i + '"><span class="n">' + (i + 1) + '</span>' + s.text + '</button></li>';
+  }).join('');
+  var chapterBtns = Array.prototype.slice.call(list.querySelectorAll('button'));
+  scrub.max = TOTAL.toFixed(2);
+
+  var t = 0, playing = false, last = 0, dirty = true;
+  function fmt(s) { s = Math.round(s); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+  function sync() {
+    scrub.value = t.toFixed(2);
+    timeEl.textContent = fmt(t) + ' / ' + fmt(TOTAL);
+    playBtn.textContent = playing ? 'Pause' : (t >= TOTAL - 0.01 ? 'Replay' : 'Play');
+  }
+  function seek(v) { t = clamp(v, 0, TOTAL); apply(t); dirty = true; sync(); }
+  function play() {
+    if (t >= TOTAL - 0.01) seek(0);
+    playing = true; last = performance.now(); sync();
+  }
+  function pause() { playing = false; sync(); }
+  playBtn.addEventListener('click', function () { if (playing) pause(); else play(); });
+  scrub.addEventListener('input', function () { pause(); seek(parseFloat(scrub.value)); });
+  chapterBtns.forEach(function (bt) {
+    bt.addEventListener('click', function () {
+      seek(STEPS[+bt.getAttribute('data-i')].t + 0.01);
+      if (!reduced) play();
+    });
+  });
+  K.orbit(canvas, view, function () { apply(t); dirty = true; });
+
+  function resize() {
+    var w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    dirty = true;
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  window.addEventListener('resize', resize);
+
+  function frame(now) {
+    if (playing) {
+      t += Math.min(0.1, (now - last) / 1000);
+      last = now;
+      if (t >= TOTAL) { t = TOTAL; playing = false; }
+      apply(t); sync(); dirty = true;
+    }
+    if (dirty) { renderer.render(scene, camera); dirty = false; }
+    requestAnimationFrame(frame);
+  }
+  resize();
+  seek(0);
+  requestAnimationFrame(frame);
+
+  if (!reduced && window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { play(); io.disconnect(); } });
+    }, { threshold: 0.5 });
+    io.observe(stage);
+  }
+
+  /* Hook used to produce still frames for the print sheets */
+  window.__seq = {
+    steps: STEPS, cyc: cyc, A0: A0, TOTAL: TOTAL,
+    snap: function (time, w, h, zoom) {
+      playing = false;
+      view.zoom = zoom || 1;
+      renderer.setPixelRatio(1);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      t = time; apply(t);
+      renderer.render(scene, camera);
+      return canvas.toDataURL('image/png');
+    }
+  };
 })();
 </script>
 </body>
